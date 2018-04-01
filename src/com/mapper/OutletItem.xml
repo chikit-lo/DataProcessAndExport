@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+    <mapper namespace="com.mapper.OutletItemMapper">
+    	<!-- 将渠道网点数据插入临时表 -->
+    	<insert id="insertOutletTable" parameterType="OutletItem">
+    		INSERT INTO temp_outlet (理货城市,供货城市,理货城市负责人,供货城市负责人,DIS门店编码,门店名称,渠道类型,店铺类型,供货级别,理货门店销售人员,理货门店销售人员电话,省份,行政区,路名_门牌号,开店日期,状态,停用日期,经销商名称,分销商名称,系统区域总仓名称,系统区域总仓编码,系统名称,系统编码,特价补差提前供货天数,特价补差供货结束天数,预算归口部门,客户类型,更新时间,经销商编码,分销商编码,门店所在城市) 
+    		VALUES (#{tallyCity,jdbcType=VARCHAR}, #{supplyCity,jdbcType=VARCHAR}, #{tallyCityLeader,jdbcType=VARCHAR}, #{supplyCityLeader,jdbcType=VARCHAR}, #{storeCode,jdbcType=VARCHAR}, #{storeName,jdbcType=VARCHAR}, #{channelType,jdbcType=VARCHAR}, #{shopType,jdbcType=VARCHAR}, #{supplyLevel,jdbcType=VARCHAR}, #{tallyStoreStaff,jdbcType=VARCHAR}, #{tallyStoreStaffTel,jdbcType=VARCHAR}, #{province,jdbcType=VARCHAR}, #{district,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{startDate,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, #{endDate,jdbcType=VARCHAR}, #{dealerName,jdbcType=VARCHAR}, #{distributorName,jdbcType=VARCHAR}, #{systemRegionalWarehouseName,jdbcType=VARCHAR}, #{systemRegionalWarehouseCode,jdbcType=VARCHAR}, #{systemName,jdbcType=VARCHAR}, #{systemCode,jdbcType=VARCHAR}, #{aheadSupplyDays,jdbcType=VARCHAR}, #{endSupplyDays,jdbcType=VARCHAR}, #{department,jdbcType=VARCHAR}, #{customerType,jdbcType=VARCHAR}, #{updateTime,jdbcType=VARCHAR}, #{dealerCode,jdbcType=VARCHAR}, #{distributorCode,jdbcType=VARCHAR}, #{storeCity,jdbcType=VARCHAR})
+    	</insert>
+    	
+    	<!-- 将渠道网点数据插入临时表(批量插入) -->
+    	<insert id="insertOutletTableBatch" parameterType="list">
+    		BEGIN
+    		<foreach collection="list" item="outletItem" separator=";">
+    			INSERT INTO temp_outlet (理货城市,供货城市,理货城市负责人,供货城市负责人,DIS门店编码,门店名称,渠道类型,店铺类型,供货级别,理货门店销售人员,理货门店销售人员电话,省份,行政区,路名_门牌号,开店日期,状态,停用日期,经销商名称,分销商名称,系统区域总仓名称,系统区域总仓编码,系统名称,系统编码,特价补差提前供货天数,特价补差供货结束天数,预算归口部门,客户类型,更新时间,经销商编码,分销商编码,门店所在城市) 
+    			VALUES
+    			(
+    			 #{outletItem.tallyCity,jdbcType=VARCHAR}, #{outletItem.supplyCity,jdbcType=VARCHAR}, #{outletItem.tallyCityLeader,jdbcType=VARCHAR},
+    			 #{outletItem.supplyCityLeader,jdbcType=VARCHAR}, #{outletItem.storeCode,jdbcType=VARCHAR}, #{outletItem.storeName,jdbcType=VARCHAR}, 
+    			 #{outletItem.channelType,jdbcType=VARCHAR}, #{outletItem.shopType,jdbcType=VARCHAR}, #{outletItem.supplyLevel,jdbcType=VARCHAR}, 
+    			 #{outletItem.tallyStoreStaff,jdbcType=VARCHAR}, #{outletItem.tallyStoreStaffTel,jdbcType=VARCHAR}, #{outletItem.province,jdbcType=VARCHAR}, 
+    			 #{outletItem.district,jdbcType=VARCHAR}, #{outletItem.address,jdbcType=VARCHAR}, #{outletItem.startDate,jdbcType=VARCHAR}, 
+    			 #{outletItem.status,jdbcType=VARCHAR}, #{outletItem.endDate,jdbcType=VARCHAR}, #{outletItem.dealerName,jdbcType=VARCHAR}, 
+    			 #{outletItem.distributorName,jdbcType=VARCHAR}, #{outletItem.systemRegionalWarehouseName,jdbcType=VARCHAR}, #{outletItem.systemRegionalWarehouseCode,jdbcType=VARCHAR}, 
+    			 #{outletItem.systemName,jdbcType=VARCHAR}, #{outletItem.systemCode,jdbcType=VARCHAR}, #{outletItem.aheadSupplyDays,jdbcType=VARCHAR}, 
+    			 #{outletItem.endSupplyDays,jdbcType=VARCHAR}, #{outletItem.department,jdbcType=VARCHAR}, #{outletItem.customerType,jdbcType=VARCHAR}, 
+    			 #{outletItem.updateTime,jdbcType=VARCHAR}, #{outletItem.dealerCode,jdbcType=VARCHAR}, #{outletItem.distributorCode,jdbcType=VARCHAR}, 
+    			 #{outletItem.storeCity,jdbcType=VARCHAR}
+    			)
+    		</foreach>
+    		;END;
+    	</insert>
+    	
+    	<!-- 将系统信息插入自定义档案表 -->
+    	<insert id="insertDefdoc" parameterType="map">
+    		INSERT INTO bd_defdoc (CODE, CREATIONTIME, CREATOR, DATAORIGINFLAG, DATATYPE, DR, ENABLESTATE, INNERCODE, MEMO, MNECODE, MODIFIEDTIME, MODIFIER, NAME, NAME2, NAME3, NAME4, NAME5, NAME6, PID, PK_DEFDOC, PK_DEFDOCLIST, PK_GROUP, PK_ORG, SHORTNAME, SHORTNAME2, SHORTNAME3, SHORTNAME4, SHORTNAME5, SHORTNAME6, TS) 
+    		VALUES (#{code}, #{date}, '', 0, 1, 0, 2, null, null, null, null, null, #{name}, null, null, null, null, null, '~', #{uuid}, #{pk_defdoclist}, '0001A110000000000QYU', '0001A110000000000QYU', null, null, null, null, null, null, '')
+    	</insert>
+    	
+    	<!-- 将系统信息插入自定义档案表(批量插入) -->
+    	<insert id="insertDefdocBatch" parameterType="list">
+    		BEGIN
+    		<foreach collection="list" item="defdocItem" separator=";">
+    			INSERT INTO bd_defdoc (CODE, CREATIONTIME, CREATOR, DATAORIGINFLAG, DATATYPE, DR, ENABLESTATE, INNERCODE, MEMO, MNECODE, MODIFIEDTIME, MODIFIER, NAME, NAME2, NAME3, NAME4, NAME5, NAME6, PID, PK_DEFDOC, PK_DEFDOCLIST, PK_GROUP, PK_ORG, SHORTNAME, SHORTNAME2, SHORTNAME3, SHORTNAME4, SHORTNAME5, SHORTNAME6, TS) 
+    			VALUES 
+    			(
+    			 #{defdocItem.code}, #{defdocItem.date}, '', 0, 1, 0, 2, null, null, null, null, null, 
+    			 #{defdocItem.name}, null, null, null, null, null, '~', #{defdocItem.uuid}, 
+    			 #{defdocItem.pk_defdoclist}, '0001A110000000000QYU', '0001A110000000000QYU', null, null, null, null, null, null, ''
+    			)
+    		</foreach>
+    		;END;
+    	</insert>
+    	
+    	<!-- 将行政区信息插入行政区划表 -->
+    	<insert id="insertRegion" parameterType="map">
+    		INSERT INTO bd_region (CODE, CREATIONTIME, CREATOR, DATAORIGINFLAG, DR, ENABLESTATE, INNERCODE, MEMCODE, MODIFIEDTIME, MODIFIER, NAME, NAME2, NAME3, NAME4, NAME5, NAME6, PK_COUNTRY, PK_FATHER, PK_FORMAT, PK_GROUP, PK_LANG, PK_ORG, PK_REGION, PK_TIMEZONE, SHORTNAME, SHORTNAME2, SHORTNAME3, SHORTNAME4, SHORTNAME5, SHORTNAME6, TS, ZIPCODE) 
+    		VALUES (#{code}, '~', '~', -1, 0, 2, null, '~', '~', '~', #{name}, null, null, null, null, null, '0001Z010000000079UJJ', null, 'FMT0Z000000000000000', '~', 'simpchn', 'GLOBLE00000000000000', #{uuid}, '0001Z010000000079U2P', '~', null, null, null, null, null, #{date}, '~')
+    	</insert>
+    	
+    	<!-- 将行政区信息插入行政区划表(批量插入) -->
+    	<insert id="insertRegionBatch" parameterType="list">
+    		BEGIN
+    		<foreach collection="list" item="regionItem" separator=";">
+    			INSERT INTO bd_region (CODE, CREATIONTIME, CREATOR, DATAORIGINFLAG, DR, ENABLESTATE, INNERCODE, MEMCODE, MODIFIEDTIME, MODIFIER, NAME, NAME2, NAME3, NAME4, NAME5, NAME6, PK_COUNTRY, PK_FATHER, PK_FORMAT, PK_GROUP, PK_LANG, PK_ORG, PK_REGION, PK_TIMEZONE, SHORTNAME, SHORTNAME2, SHORTNAME3, SHORTNAME4, SHORTNAME5, SHORTNAME6, TS, ZIPCODE) 
+    			VALUES 
+    			(
+    			 #{regionItem.code}, '~', '~', -1, 0, 2, null, '~', '~', '~', #{regionItem.name}, null, null, null, null, null, 
+    			 '0001Z010000000079UJJ', null, 'FMT0Z000000000000000', '~', 'simpchn', 'GLOBLE00000000000000', 
+    			 #{regionItem.uuid}, '0001Z010000000079U2P', '~', null, null, null, null, null, #{regionItem.date}, '~'
+    			)
+    		</foreach>
+    		;END;
+    	</insert>
+    	
+    	<!-- 通过经销商编码获取专管部门(供货城市) -->
+    	<select id="selectSupplyCity" parameterType="string" resultType="string">
+    		SELECT 
+			org_dept.name
+			FROM bd_customer
+			LEFT JOIN bd_custsale
+			ON bd_customer.pk_customer = bd_custsale.pk_customer
+			LEFT JOIN org_dept
+			ON bd_custsale.respdept = org_dept.pk_dept
+			WHERE bd_customer.code = #{supplyCity}
+    	</select>
+    	
+    	<!-- 判断系统名称是否在自定义档案表中 -->
+    	<select id="selectSystemName" parameterType="string" resultType="string">
+    		SELECT DISTINCT name FROM bd_defdoc WHERE pk_defdoclist = '1001N6100000000029KV' AND name = #{systemName,jdbcType=VARCHAR}
+    	</select>
+    	
+    	<!-- 清空临时表 -->
+    	<delete id="truncateOutletTable">
+    		TRUNCATE TABLE temp_outlet
+    	</delete>
+    	
+    	<!-- 更新临时表 -->
+    	<update id="updateOutletStatus">
+    		UPDATE temp_outlet SET 状态 = CASE WHEN 状态 = '1' THEN '启用' WHEN 状态 = '0' THEN '停用' END WHERE 状态 IN ('1','0')
+    	</update>
+    	
+    	<update id="updateOutletAheadSupplyDays">
+    		UPDATE temp_outlet SET 特价补差提前供货天数 = '0' WHERE 特价补差提前供货天数 IN ('待定','实销实补')
+    	</update>
+    	
+    	<update id="updateOutletEndSupplyDays">
+    		UPDATE temp_outlet SET 特价补差供货结束天数 = '0' WHERE 特价补差供货结束天数 IN ('待定','实销实补')
+    	</update>
+    	
+    	<update id="updateOutletStoreCity">
+    		UPDATE temp_outlet SET 门店所在城市 = NULL
+    	</update>
+    	
+    	<update id="updateOutletSupplyCity">
+    		UPDATE temp_outlet SET 供货城市 = 
+			(SELECT 
+			org_dept.name
+			FROM bd_customer
+			LEFT JOIN bd_custsale
+			ON bd_customer.pk_customer = bd_custsale.pk_customer
+			LEFT JOIN org_dept
+			ON bd_custsale.respdept = org_dept.pk_dept
+			WHERE bd_customer.code = 经销商编码)
+    	</update>
+    	
+    	<!-- 获取不在自定义档案表中的系统信息 -->
+    	<select id="selectDistinctSystem" resultType="map">
+    		SELECT DISTINCT CASE WHEN 系统编码 = 系统名称 THEN '~' ELSE 系统编码 END AS 系统编码,系统名称 FROM temp_outlet WHERE 系统名称 NOT IN (SELECT name FROM bd_defdoc WHERE pk_defdoclist = '1001N6100000000029KV') AND 系统名称 IS NOT NULL
+    	</select>
+    	
+    	<!-- 获取不在自定义档案表中的系统信息 -->
+    	<select id="selectDistinctRegionSystem" resultType="map">
+    		SELECT DISTINCT CASE WHEN 系统区域总仓编码 = 系统区域总仓名称 THEN '~' ELSE 系统区域总仓编码 END AS 系统区域总仓编码,系统区域总仓名称 FROM temp_outlet WHERE 系统区域总仓名称 NOT IN (SELECT name FROM bd_defdoc WHERE pk_defdoclist = '1001N6100000000029LY') AND 系统区域总仓名称 IS NOT NULL
+    	</select>
+    	
+    	<!-- 获取不在行政区划表中的行政区 -->
+    	<select id="selectDistinctRegion" resultType="map">
+    		SELECT DISTINCT 行政区 FROM temp_outlet WHERE 行政区 NOT IN (SELECT name FROM bd_region WHERE code LIKE 'X%') AND 行政区 IS NOT NULL
+    	</select>
+    	
+    	<!-- 统计行政区划表记录数量 -->
+    	<select id="selectCountRegion" resultType="int">
+    		SELECT COUNT(*) FROM bd_region WHERE code LIKE 'X%'
+    	</select>
+    	
+    	<!-- 从临时表返回数据 -->
+    	<select id="selectOutletData" resultType="OutletItem">
+    		SELECT 理货城市 AS tallyCity,供货城市 AS supplyCity,理货城市负责人 AS tallyCityLeader,供货城市负责人 AS supplyCityLeader,DIS门店编码 AS storeCode,
+    		门店名称 AS storeName,渠道类型 AS channelType,店铺类型 AS shopType,供货级别 AS supplyLevel,理货门店销售人员 AS tallyStoreStaff,理货门店销售人员电话 AS tallyStoreStaffTel,
+    		省份 AS province,行政区 AS district,路名_门牌号 AS address,开店日期 AS startDate,状态 AS status,停用日期 AS endDate,经销商名称 AS dealerName,分销商名称 AS distributorName,
+    		系统区域总仓名称 AS systemRegionalWarehouseName,系统区域总仓编码 AS systemRegionalWarehouseCode,系统名称 AS systemName,系统编码 AS systemCode,特价补差提前供货天数 AS aheadSupplyDays,
+    		特价补差供货结束天数 AS endSupplyDays,预算归口部门 AS department,客户类型 AS customerType,更新时间 AS updateTime,经销商编码 AS dealerCode,分销商编码 AS distributorCode,门店所在城市 AS storeCity FROM temp_outlet
+    		WHERE 经销商编码 LIKE 'KH%'
+    	</select>
+    </mapper>

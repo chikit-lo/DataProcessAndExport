@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+    <mapper namespace="com.mapper.MaterialItemMapper">
+    	<insert id="add" parameterType="MaterialItem">
+    		INSERT INTO export_material (物料编码,原编码,助记码,物料名称,条形码,品牌,物料分类,品类,表层,配方,形状,厚度,长度,用途,规格,包装类型,产品属性,辅单位,主单位,物料价格,最小单位,计量单位换算率,物料税率,主键,DR值,创建时间,最后修改时间) 
+    		VALUES (#{code,jdbcType=VARCHAR}, #{oldcode,jdbcType=VARCHAR}, #{materialmnecode,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{materialbarcode,jdbcType=VARCHAR}, #{brand,jdbcType=VARCHAR}, #{marbasclass,jdbcType=VARCHAR}, #{category,jdbcType=VARCHAR}, #{surface,jdbcType=VARCHAR}, #{formular,jdbcType=VARCHAR}, #{shape,jdbcType=VARCHAR}, #{thickness,jdbcType=VARCHAR}, #{unitlength,jdbcType=VARCHAR}, #{useage,jdbcType=VARCHAR}, #{materialspec,jdbcType=VARCHAR}, #{packagetype,jdbcType=VARCHAR}, #{productattribute,jdbcType=VARCHAR}, #{auxiliaryunit,jdbcType=VARCHAR}, #{primaryunit,jdbcType=VARCHAR}, #{price,jdbcType=VARCHAR}, #{minunit,jdbcType=VARCHAR}, #{measrate,jdbcType=VARCHAR}, #{tax,jdbcType=VARCHAR}, #{pk_material,jdbcType=VARCHAR}, #{dr,jdbcType=VARCHAR}, #{creationtime,jdbcType=VARCHAR}, #{modifiedtime,jdbcType=VARCHAR})
+    	</insert>
+    	
+    	<select id="getMaterialInfo" resultType="map">
+    		SELECT
+			bd_material.code AS code,
+			bd_material.ename AS oldcode,
+			bd_material.materialmnecode AS materialmnecode,
+			bd_material.name AS name,
+			bd_material.materialbarcode AS materialbarcode,
+			bd_branddoc.name AS brand,
+			bd_marbasclass.name AS marbasclass,
+			bd_defdoc8.name AS category,
+			bd_defdoc1.name AS surface,
+			bd_defdoc2.name AS formular,
+			bd_defdoc3.name AS shape,
+			bd_defdoc4.name AS thickness,
+			bd_material.unitlength AS unitlength,
+			bd_defdoc5.name AS useage,
+			bd_material.materialspec AS materialspec,
+			bd_defdoc6.name AS packagetype,
+			bd_defdoc7.name AS productattribute,
+			bd_measdoc.name AS auxiliaryunit,
+			bd_measdoc2.name AS primaryunit,
+			prm_tariff.nprice1 AS price,
+			bd_measdoc2.name AS minunit,
+			bd_materialconvert.measrate AS measrate,
+			bd_mattaxes.mattaxesname AS tax,
+			bd_material.pk_material AS pk_material,
+			bd_material.dr AS dr,
+			bd_material.creationtime AS creationtime,
+			bd_material.modifiedtime AS modifiedtime
+			FROM bd_material
+			LEFT JOIN bd_branddoc
+			ON bd_material.pk_brand = bd_branddoc.pk_brand
+			LEFT JOIN bd_marbasclass
+			ON bd_material.pk_marbasclass = bd_marbasclass.pk_marbasclass 
+			LEFT JOIN bd_materialconvert
+			ON bd_material.pk_material = bd_materialconvert.pk_material AND bd_materialconvert.dr = '0'
+			LEFT JOIN bd_defdoc bd_defdoc8
+			ON bd_material.def8 = bd_defdoc8.pk_defdoc
+			LEFT JOIN bd_defdoc bd_defdoc1
+			ON bd_material.def1 = bd_defdoc1.pk_defdoc
+			LEFT JOIN bd_defdoc bd_defdoc2
+			ON bd_material.def2 = bd_defdoc2.pk_defdoc
+			LEFT JOIN bd_defdoc bd_defdoc3
+			ON bd_material.def3 = bd_defdoc3.pk_defdoc
+			LEFT JOIN bd_defdoc bd_defdoc4
+			ON bd_material.def4 = bd_defdoc4.pk_defdoc
+			LEFT JOIN bd_defdoc bd_defdoc5
+			ON bd_material.def5 = bd_defdoc5.pk_defdoc
+			LEFT JOIN bd_defdoc bd_defdoc6
+			ON bd_material.def6 = bd_defdoc6.pk_defdoc
+			LEFT JOIN bd_defdoc bd_defdoc7
+			ON bd_material.def7 = bd_defdoc7.pk_defdoc
+			LEFT JOIN bd_measdoc
+			ON bd_measdoc.pk_measdoc = bd_materialconvert.pk_measdoc AND bd_measdoc.dr = '0'
+			LEFT JOIN bd_measdoc bd_measdoc2
+			ON bd_measdoc2.pk_measdoc = bd_material.pk_measdoc AND bd_measdoc2.dr = '0'
+			LEFT JOIN prm_tariff
+			ON bd_material.pk_material = prm_tariff.pk_material AND prm_tariff.pk_tariffdef = '1001A11000000000DSXS' AND prm_tariff.dr = '0'
+			LEFT JOIN bd_mattaxes
+			ON bd_material.pk_mattaxes = bd_mattaxes.pk_mattaxes
+			WHERE bd_material.dr = '0' AND bd_material.enablestate = '2' AND bd_marbasclass.enablestate = '2' AND bd_marbasclass.code LIKE '01%'
+			ORDER BY bd_material.code
+    	</select>
+    	
+    	<!-- 导出NC成品类物料, 但只导出ABC/FREE/EC/BB的品类, 且排除粒料/试用装/直片巾的物料 -->
+    	<select id="getMaterialInfo2" resultType="MaterialItem">
+    		SELECT
+			bd_material.code AS code,
+			bd_material.ename AS oldcode,
+			bd_material.materialmnecode AS materialmnecode,
+			bd_material.name AS name,
+			bd_material.materialbarcode AS materialbarcode,
+			bd_branddoc.name AS brand,
+			bd_marbasclass.name AS marbasclass,
+			bd_defdoc8.name AS category,
+			bd_defdoc1.name AS surface,
+			bd_defdoc2.name AS formular,
+			bd_defdoc3.name AS shape,
+			bd_defdoc4.name AS thickness,
+			bd_material.unitlength AS unitlength,
+			bd_defdoc5.name AS useage,
+			bd_material.materialspec AS materialspec,
+			bd_defdoc6.name AS packagetype,
+			bd_defdoc7.name AS productattribute,
+			bd_measdoc.name AS auxiliaryunit,
+			bd_measdoc2.name AS primaryunit,
+			prm_tariff.nprice1 AS price,
+			bd_measdoc2.name AS minunit,
+			bd_materialconvert.measrate AS measrate,
+			bd_mattaxes.mattaxesname AS tax,
+			bd_material.pk_material AS pk_material,
+			bd_material.dr AS dr,
+			bd_material.creationtime AS creationtime,
+			bd_material.modifiedtime AS modifiedtime,
+			DECODE(bd_material.enablestate, '2', '已启用', '3', '已停用') AS enablestate
+			FROM bd_material
+			LEFT JOIN bd_branddoc
+			ON bd_material.pk_brand = bd_branddoc.pk_brand
+			LEFT JOIN bd_marbasclass
+			ON bd_material.pk_marbasclass = bd_marbasclass.pk_marbasclass 
+			LEFT JOIN bd_materialconvert
+			ON bd_material.pk_material = bd_materialconvert.pk_material AND bd_materialconvert.dr = '0'
+			LEFT JOIN bd_defdoc bd_defdoc8
+			ON bd_material.def8 = bd_defdoc8.pk_defdoc
+			LEFT JOIN bd_defdoc bd_defdoc1
+			ON bd_material.def1 = bd_defdoc1.pk_defdoc
+			LEFT JOIN bd_defdoc bd_defdoc2
+			ON bd_material.def2 = bd_defdoc2.pk_defdoc
+			LEFT JOIN bd_defdoc bd_defdoc3
+			ON bd_material.def3 = bd_defdoc3.pk_defdoc
+			LEFT JOIN bd_defdoc bd_defdoc4
+			ON bd_material.def4 = bd_defdoc4.pk_defdoc
+			LEFT JOIN bd_defdoc bd_defdoc5
+			ON bd_material.def5 = bd_defdoc5.pk_defdoc
+			LEFT JOIN bd_defdoc bd_defdoc6
+			ON bd_material.def6 = bd_defdoc6.pk_defdoc
+			LEFT JOIN bd_defdoc bd_defdoc7
+			ON bd_material.def7 = bd_defdoc7.pk_defdoc
+			LEFT JOIN bd_measdoc
+			ON bd_measdoc.pk_measdoc = bd_materialconvert.pk_measdoc AND bd_measdoc.dr = '0'
+			LEFT JOIN bd_measdoc bd_measdoc2
+			ON bd_measdoc2.pk_measdoc = bd_material.pk_measdoc AND bd_measdoc2.dr = '0'
+			LEFT JOIN prm_tariff
+			ON bd_material.pk_material = prm_tariff.pk_material AND prm_tariff.pk_tariffdef = '1001A11000000000DSXS' AND prm_tariff.dr = '0'
+			LEFT JOIN bd_mattaxes
+			ON bd_material.pk_mattaxes = bd_mattaxes.pk_mattaxes
+			WHERE bd_material.dr = '0' AND bd_material.enablestate IN ('2','3') AND bd_marbasclass.enablestate = '2'
+			AND (bd_marbasclass.code LIKE '01%' AND bd_marbasclass.code NOT LIKE '0105%' AND bd_marbasclass.code NOT LIKE '0199%') 
+			AND (bd_marbasclass.name NOT LIKE '%粒料%' AND bd_marbasclass.name NOT LIKE '%试用装%' AND bd_marbasclass.name NOT LIKE '%直巾片%')
+			AND (bd_material.name NOT LIKE '%粒料%' AND bd_material.name NOT LIKE '%试用装%' AND bd_material.name NOT LIKE '%直巾片%')
+			ORDER BY bd_material.code
+    	</select>
+    	
+    	<select id="getBrand" resultType="string" parameterType="string">
+    		SELECT name FROM bd_branddoc WHERE pk_brand = #{pk_brand}
+    	</select>
+    	
+    	<select id="getMarbasclass" resultType="string" parameterType="string">
+    		SELECT name FROM bd_marbasclass WHERE pk_marbasclass = #{pk_marbasclass}
+    	</select>
+    	
+    	<select id="getDefdoc" resultType="string" parameterType="string">
+    		SELECT name FROM bd_defdoc WHERE pk_defdoc = #{pk_defdoc}
+    	</select>
+    	
+    	<select id="getAuxiliaryunit" resultType="string" parameterType="string">
+    		SELECT name FROM bd_measdoc WHERE pk_measdoc IN (SELECT pk_measdoc FROM bd_materialconvert WHERE dr = '0' AND pk_material = #{pk_material})
+    	</select>
+    	
+    	<select id="getPrimaryunit" resultType="string" parameterType="string">
+    		SELECT name FROM bd_measdoc WHERE pk_measdoc = #{pk_measdoc}
+    	</select>
+    	
+    	<select id="getPrice" resultType="float" parameterType="string">
+    		SELECT nprice1 FROM prm_tariff WHERE dr = '0' AND pk_tariffdef pk_tariffdef = '1001A11000000000DSXS' AND pk_material = #{pk_material}
+    	</select>
+    	
+    	<select id="getMeasrate" resultType="string" parameterType="string">
+    		SELECT measrate FROM bd_materialconvert WHERE pk_material = #{pk_material} AND dr = '0'
+    	</select>
+    </mapper>

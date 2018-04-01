@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+    <mapper namespace="com.mapper.UpdateDataMapper">
+    	<!-- 更新薪资档案财务组织版本信息 -->
+    	<update id="updateFiorgvid" parameterType="map">
+    		UPDATE wa_data SET fiporgvid = (SELECT pk_vid FROM org_financeorg_v WHERE code = #{code}) 
+    		WHERE pk_psndoc IN (SELECT pk_psndoc FROM hi_psndoc_ctrt WHERE pk_majorcorp IN (SELECT pk_corp FROM org_corp WHERE code = #{code}) AND lastflag = 'Y') 
+    		AND cyearperiod = #{yyyyMM}
+    	</update>
+    	
+    	<!-- 更新薪资档案成本中心信息 -->
+    	<update id="updateLiabilityorg" parameterType="map">
+    		UPDATE wa_data SET pk_liabilityorg = (SELECT pk_costcenter FROM resa_costcenter WHERE cccode = #{code}) 
+    		WHERE pk_psndoc IN (SELECT pk_psndoc FROM hi_psndoc_ctrt WHERE pk_majorcorp IN (SELECT pk_corp FROM org_corp WHERE code = #{code}) AND lastflag = 'Y') 
+    		AND cyearperiod = #{yyyyMM}
+    	</update>
+    	
+    	<!-- 更新薪资档案财务组织信息 -->
+    	<update id="updateFinanceorg" parameterType="map">
+    		UPDATE wa_data SET pk_financeorg = (SELECT pk_financeorg FROM org_financeorg WHERE code = #{code}) 
+    		WHERE pk_psndoc IN (SELECT pk_psndoc FROM hi_psndoc_ctrt WHERE pk_majorcorp IN (SELECT pk_corp FROM org_corp WHERE code = #{code}) AND lastflag = 'Y') 
+    		AND cyearperiod = #{yyyyMM}
+    	</update>
+    	
+    	<!-- 更新薪资档案成本部门信息 -->
+    	<update id="updateLiabilitydept" parameterType="string">
+    		UPDATE wa_data wa_data_primary 
+    		SET wa_data_primary.pk_liabilitydept = 
+    			(SELECT wa_data_secondary.workdept FROM wa_data wa_data_secondary WHERE wa_data_secondary.pk_wa_data = wa_data_primary.pk_wa_data)
+			WHERE wa_data_primary.cyearperiod = #{yyyyMM}
+    	</update>
+    	
+    	<!-- 更新薪资档案成本部门版本信息 -->
+    	<update id="updateLibdeptvid" parameterType="string">
+    		UPDATE wa_data wa_data_primary 
+    		SET wa_data_primary.libdeptvid = 
+    			(SELECT wa_data_secondary.workdeptvid FROM wa_data wa_data_secondary WHERE wa_data_secondary.pk_wa_data = wa_data_primary.pk_wa_data)
+			WHERE wa_data_primary.cyearperiod = #{yyyyMM}
+    	</update>
+    	
+    	<!-- 更新薪资档案财务部门版本信息 -->
+    	<update id="updateFipdeptvid" parameterType="string">
+    		UPDATE wa_data wa_data_primary 
+    		SET wa_data_primary.fipdeptvid = 
+    			(
+	    			SELECT org_dept_v.pk_vid FROM org_dept_v
+					LEFT JOIN wa_data wa_data_secondary
+					ON org_dept_v.name = wa_data_secondary.c_1
+					WHERE org_dept_v.dr = '0' AND wa_data_secondary.dr = '0'
+					AND org_dept_v.pk_vid != '0001A110000000002X6L' 
+					AND wa_data_secondary.c_1 IS NOT NULL 
+					AND wa_data_secondary.pk_wa_data = wa_data_primary.pk_wa_data
+				)
+			WHERE wa_data_primary.cyearperiod = #{yyyyMM} AND wa_data_primary.c_1 IS NOT NULL
+    	</update>
+    	
+    	<!-- 更新薪资档案财务部门信息 -->
+    	<update id="updateFinancedept" parameterType="string">
+    		UPDATE wa_data wa_data_primary 
+    		SET wa_data_primary.pk_financedept = 
+    			(
+	    			SELECT org_dept.pk_dept FROM org_dept
+					LEFT JOIN wa_data wa_data_secondary
+					ON org_dept.name = wa_data_secondary.c_1
+					WHERE org_dept.dr = '0' AND wa_data_secondary.dr = '0' 
+					AND wa_data_secondary.c_1 IS NOT NULL 
+					AND wa_data_secondary.pk_wa_data = wa_data_primary.pk_wa_data
+				)
+			WHERE wa_data_primary.cyearperiod = #{yyyyMM} AND wa_data_primary.c_1 IS NOT NULL
+    	</update>
+    	
+    	<!-- 更新客户应收单行P2价 -->
+    	<update id="updateP2value">
+    		UPDATE ar_recitem
+			SET ar_recitem.def3 = (SELECT norigtaxmny / nnum FROM so_saleorder_b WHERE so_saleorder_b.csaleorderbid = ar_recitem.src_itemid)
+			WHERE ar_recitem.def3 = '~' AND ar_recitem.top_billtype = '32'
+    	</update>
+    	
+    	<!-- 更新客户应收单行P3价 -->
+    	<update id="updateP3value">
+    		UPDATE ar_recitem
+			SET ar_recitem.def4 = (SELECT nqtorigtaxprice FROM so_saleorder_b WHERE so_saleorder_b.csaleorderbid = ar_recitem.src_itemid)
+			WHERE ar_recitem.def4 = '~' AND ar_recitem.top_billtype = '32'
+    	</update>
+    	
+    	<!-- 
+    	<update id="updateFiorgvid_0101" parameterType="string">
+    		UPDATE wa_data SET fiporgvid = (SELECT pk_vid FROM org_corp WHERE code = '0101') 
+    		WHERE pk_psndoc IN (SELECT pk_psndoc FROM hi_psndoc_ctrt WHERE pk_majorcorp IN (SELECT pk_corp FROM org_corp WHERE code = '0101') AND lastflag = 'Y') 
+    		AND cyearperiod = #{yyyyMM}
+    	</update>
+    	
+    	<update id="updateFiorgvid_0102" parameterType="string">
+    		UPDATE wa_data SET fiporgvid = (SELECT pk_vid FROM org_corp WHERE code = '0102') 
+    		WHERE pk_psndoc IN (SELECT pk_psndoc FROM hi_psndoc_ctrt WHERE pk_majorcorp IN (SELECT pk_corp FROM org_corp WHERE code = '0102') AND lastflag = 'Y') 
+    		AND cyearperiod = #{yyyyMM}
+    	</update>
+    	
+    	<update id="updateLiabilityorg_0101" parameterType="string">
+    		UPDATE wa_data SET pk_liabilityorg = (SELECT pk_liabilityorg FROM ? WHERE code = '0101') 
+    		WHERE pk_psndoc IN (SELECT pk_psndoc FROM hi_psndoc_ctrt WHERE pk_majorcorp IN (SELECT pk_corp FROM org_corp WHERE code = '0101') AND lastflag = 'Y') 
+    		AND cyearperiod = #{yyyyMM}
+    	</update>
+    	
+    	<update id="updateLiabilityorg_0102" parameterType="string">
+    		UPDATE wa_data SET pk_liabilityorg = (SELECT pk_liabilityorg FROM ? WHERE code = '0102') 
+    		WHERE pk_psndoc IN (SELECT pk_psndoc FROM hi_psndoc_ctrt WHERE pk_majorcorp IN (SELECT pk_corp FROM org_corp WHERE code = '0102') AND lastflag = 'Y') 
+    		AND cyearperiod = #{yyyyMM}
+    	</update>
+    	
+    	<update id="updateFinanceorg_0101" parameterType="string">
+    		UPDATE wa_data SET pk_financeorg = (SELECT pk_financeorg FROM org_financeorg WHERE code = '0101') 
+    		WHERE pk_psndoc IN (SELECT pk_psndoc FROM hi_psndoc_ctrt WHERE pk_majorcorp IN (SELECT pk_corp FROM org_corp WHERE code = '0101') AND lastflag = 'Y') 
+    		AND cyearperiod = #{yyyyMM}
+    	</update>
+    	
+    	<update id="updateFinanceorg_0102" parameterType="string">
+    		UPDATE wa_data SET pk_financeorg = (SELECT pk_financeorg FROM org_financeorg WHERE code = '0102') 
+    		WHERE pk_psndoc IN (SELECT pk_psndoc FROM hi_psndoc_ctrt WHERE pk_majorcorp IN (SELECT pk_corp FROM org_corp WHERE code = '0102') AND lastflag = 'Y') 
+    		AND cyearperiod = #{yyyyMM}
+    	</update>
+    	 -->
+    </mapper>

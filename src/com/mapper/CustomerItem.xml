@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+    <mapper namespace="com.mapper.CustomerItemMapper">
+    	<insert id="add" parameterType="CustomerItem">
+    		INSERT INTO export_customer (主键,客户编码,旧编码,客户名称,地区分类,客户简称,客户基本分类,企业地址,专管业务员,电话,邮箱,表体_客户联系人_联系人,表体_客户联系人_电话,Email,启用状态,启用时间,停用时间) 
+    		VALUES (#{pk_customer,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR}, #{encode,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{area,jdbcType=VARCHAR}, #{shortname,jdbcType=VARCHAR}, #{custclass,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{manager,jdbcType=VARCHAR}, #{officephone,jdbcType=VARCHAR}, #{mailbox,jdbcType=VARCHAR}, #{contact,jdbcType=VARCHAR}, #{contacttel,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, #{enabletime,jdbcType=VARCHAR}, #{downtime,jdbcType=VARCHAR})
+    	</insert>
+    	
+    	<select id="getCustomerInfo" resultType="map">
+    		SELECT
+			bd_customer.pk_customer AS pk_customer,
+			bd_customer.code AS code,
+			bd_customer.def1 AS encode,
+			bd_customer.name AS name,
+			bd_areacl.name AS area,
+			bd_customer.shortname AS shortname,
+			bd_custclass.name AS custclass,
+			bd_address.detailinfo AS address,
+			bd_psndoc.name AS manager,
+			bd_psndoc.officephone AS officephone,
+			bd_psndoc.email AS mailbox,
+			bd_linkman.name AS contact,
+			bd_linkman.phone AS contacttel,
+			bd_linkman.email AS email,
+			CASE bd_customer.enablestate WHEN 1 THEN '否' WHEN 2 THEN '是' WHEN 3 THEN '已停用' END AS status,
+			'' AS enabletime,
+			'' AS downtime
+			FROM bd_customer
+			LEFT JOIN bd_areacl
+			ON bd_customer.pk_areacl = bd_areacl.pk_areacl
+			LEFT JOIN bd_custclass
+			ON bd_customer.pk_custclass = bd_custclass.pk_custclass
+			LEFT JOIN bd_address
+			ON bd_customer.corpaddress = bd_address.pk_address
+			LEFT JOIN bd_custsale
+			ON bd_customer.pk_customer = bd_custsale.pk_customer
+			LEFT JOIN org_dept
+			ON bd_custsale.respdept = org_dept.pk_dept
+			LEFT JOIN bd_psndoc
+			ON bd_custsale.respperson = bd_psndoc.pk_psndoc
+			LEFT JOIN bd_custlinkman
+			ON bd_customer.pk_customer = bd_custlinkman.pk_customer
+			LEFT JOIN bd_linkman
+			ON bd_custlinkman.pk_linkman = bd_linkman.pk_linkman
+			WHERE bd_customer.dr = '0' AND bd_customer.enablestate = '2' AND bd_customer.pk_custclass IN (SELECT pk_custclass FROM bd_custclass WHERE code IN ('0101','0102','0103','0104'))
+			ORDER BY bd_customer.code
+    	</select>
+    	
+    	<select id="getCustomerInfo2" resultType="CustomerItem">
+    		SELECT
+			bd_customer.pk_customer AS pk_customer,
+			bd_customer.code AS code,
+			bd_customer.def1 AS encode,
+			bd_customer.name AS name,
+			bd_areacl.name AS area,
+			bd_customer.shortname AS shortname,
+			bd_custclass.name AS custclass,
+			bd_address.detailinfo AS address,
+			bd_psndoc.name AS manager,
+			bd_psndoc.officephone AS officephone,
+			bd_psndoc.email AS mailbox,
+			bd_linkman.name AS contact,
+			bd_linkman.phone AS contacttel,
+			bd_linkman.email AS email,
+			'已启用' AS status,
+			bd_customer.creationtime AS enabletime,
+			CASE bd_customer.def8 WHEN '1001A1100000003K6VFO' THEN bd_customer.modifiedtime ELSE '' END AS downtime
+			FROM bd_customer
+			LEFT JOIN bd_areacl
+			ON bd_customer.pk_areacl = bd_areacl.pk_areacl
+			LEFT JOIN bd_custclass
+			ON bd_customer.pk_custclass = bd_custclass.pk_custclass
+			LEFT JOIN bd_address
+			ON bd_customer.corpaddress = bd_address.pk_address
+			LEFT JOIN bd_custsale
+			ON bd_customer.pk_customer = bd_custsale.pk_customer
+			LEFT JOIN org_dept
+			ON bd_custsale.respdept = org_dept.pk_dept
+			LEFT JOIN bd_psndoc
+			ON bd_custsale.respperson = bd_psndoc.pk_psndoc
+			LEFT JOIN bd_custlinkman
+			ON bd_customer.pk_customer = bd_custlinkman.pk_customer
+			LEFT JOIN bd_linkman
+			ON bd_custlinkman.pk_linkman = bd_linkman.pk_linkman
+			WHERE bd_customer.dr = '0' AND bd_customer.enablestate IN ('2') AND bd_customer.code LIKE 'KH%'
+			AND bd_customer.pk_custclass IN (SELECT pk_custclass FROM bd_custclass WHERE code IN ('0101','0102','0103','0104'))
+			AND bd_customer.def8 = '1001A1100000003K6VFN'
+			ORDER BY bd_customer.code
+    	</select>
+    </mapper>

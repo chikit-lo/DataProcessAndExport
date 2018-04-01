@@ -1,0 +1,1416 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+    <mapper namespace="com.mapper.ReportMapper">
+    	<!-- 客户折扣单销售明细表(财务部) -->
+    	<select id="getKHZKDXSMX_1" parameterType="map" resultType="map">
+    		SELECT
+			    bd_custsale.pk_org                    AS 组织主键,
+			    org_orgs.code                         AS 组织编码,
+			    org_orgs.name                         AS 财务组织,
+			    org_dept.pk_dept                      AS 部门主键,
+			    org_dept.code                         AS 部门编码,
+			    org_dept.name                         AS 部门名称 ,
+			    SUBSTR(ic_saleout_h.dbilldate, 1, 10) AS 出库日期,
+			    bd_customer.code                      AS 客户编码,
+			    bd_customer.name                      AS 客户名称,
+			    joindata2.vbillcode                   AS 客户费用单号,
+			    so_saleorder.vbillcode                AS 订单号 ,
+			    ic_saleout_h.vbillcode                AS 出库单号,
+			    joindata3.zxdjh                       AS 最小出库单号,
+			    bd_customer.shortname                 AS 客户简称,
+			    ic_saleout_b.cmaterialvid             AS 物料主键,
+			    bd_branddoc.pk_brand                  AS 品牌主键,
+			    bd_branddoc.name                AS 品牌,
+			    bd_prodline.pk_prodline         AS 生产线主键,
+			    bd_prodline.name                AS 生产线,
+			    bd_material.materialmnecode     AS 助记码,
+			    joindata1.nnum                  AS 实发数量,
+			    so_saleorder_b.norigtaxmny      AS 价税合计,
+			    so_saleorder_b.nqtorigtaxnetprc AS 含税净价,
+			    so_saleorder_exe.norigsubmny    AS 累计冲抵金额,
+			    so_saleorder_b.nnum             AS 主数量,
+			    so_saleorder.ntotalorigsubmny   AS 费用冲抵金额,
+			    so_saleorder.ntotalorigmny      AS 价税总合计,
+			    joindata2.cjje                  AS 冲减金额,
+			    so_saleorder_b.bboutendflag     AS 发货是否关闭,
+			    joindata2.zcje                  AS 支持金额,
+			    joindata2.cdje                  AS 冲抵金额,
+			    joindata2.ye                    AS 余额,
+			    joindata2.jzje                  AS 记账金额,
+			    joindata2.ppmc                  AS 客户费用单品牌,
+			    joindata2.szxm                  AS 客户费用单收支项目,
+			    joindata2.carsubbid             AS 客户费用单字表ID,
+			    joindata2.djzt                        AS 客户费用单状态,
+			    joindata2.djlx                        AS 客户费用单类型,
+			    joindata2.djrq                        AS 客户费用单日期,
+			    joindata2.bz                          AS 备注,
+			    joindata2.nf                          AS 年份,
+			    SUBSTR(so_saleorder.dbilldate, 1, 10) AS 订单日期,
+			    DECODE(so_saleorder.fstatusflag, '1', '自由', '2', '审批通过', '3', '冻结', '4', '关闭', '5', '失效', '7', '审批中', '8', '审批不通过') AS 订单单据状态,
+			    DECODE(ic_saleout_h.fbillflag, '1', '删除', '2', '自由', '3', '签字', '4', '审核', '5', '审核中', '6', '审核不通过', '7', '已调差状态') AS 出库单单据状态,
+			    CASE 
+				    WHEN to_number(SUBSTR(ic_saleout_h.vbillcode, 5, 11) || ic_saleout_b.crowno) = joindata3.zxdjh
+				    THEN (
+				    	CASE WHEN so_saleorder_b.bboutendflag = 'Y'
+				        THEN ROUND(((((so_saleorder_exe.norigsubmny - (
+				        	CASE WHEN so_saleorder_b.vbdef18 IN ('~', 'NULL')
+				            THEN 0
+				            WHEN so_saleorder_b.vbdef18 NOT IN ('~', 'NULL')
+				            THEN to_number(so_saleorder_b.vbdef18) END)) * (
+				            	joindata2.cjje / NULLIF((so_saleorder.ntotalorigsubmny - (
+				                	CASE WHEN so_saleorder.vdef18 IN ('~', 'NULL')
+				                    THEN 0
+				                    WHEN so_saleorder.vdef18 NOT IN ('~', 'NULL')
+				                    THEN to_number(so_saleorder.vdef18) END)), 0))))), 2)
+				    	WHEN so_saleorder_b.bboutendflag = 'N'
+				        THEN ROUND(((((so_saleorder_exe.norigsubmny - (
+				        	CASE WHEN so_saleorder_b.vbdef18 IN ('~', 'NULL')
+				            THEN 0
+				            WHEN so_saleorder_b.vbdef18 NOT IN ('~', 'NULL')
+				            THEN to_number(so_saleorder_b.vbdef18) END)) * (
+				            	joindata2.cjje / NULLIF((so_saleorder.ntotalorigsubmny - (
+				                	CASE WHEN so_saleorder.vdef18 IN ('~', 'NULL')
+				                    THEN 0
+				                    WHEN so_saleorder.vdef18 NOT IN ('~', 'NULL')
+				                    THEN to_number(so_saleorder.vdef18) END)), 0))))), 2)
+				                    END)
+				    WHEN joindata3.zxdjh IS NULL
+				    THEN ROUND(((((so_saleorder_exe.norigsubmny - (
+			        	CASE WHEN so_saleorder_b.vbdef18 IN ('~', 'NULL')
+			            THEN 0
+			            WHEN so_saleorder_b.vbdef18 NOT IN ('~', 'NULL')
+			            THEN to_number(so_saleorder_b.vbdef18) END)) * (
+			            	joindata2.cjje / NULLIF((so_saleorder.ntotalorigsubmny - (
+			                	CASE WHEN so_saleorder.vdef18 IN ('~', 'NULL')
+			                    THEN 0
+			                    WHEN so_saleorder.vdef18 NOT IN ('~', 'NULL')
+			                    THEN to_number(so_saleorder.vdef18) END)), 0))) / NULLIF(so_saleorder_b.nnum, 0)) * ic_saleout_b.nnum), 2)
+			        ELSE NULL
+			    END AS 订单冲抵金额,
+			    CASE WHEN so_saleorder_b.bboutendflag = 'Y'
+			    THEN ROUND(((((so_saleorder_exe.norigsubmny - (
+			    	CASE WHEN so_saleorder_b.vbdef18 IN ('~', 'NULL')
+			        THEN 0
+			        WHEN so_saleorder_b.vbdef18 NOT IN ('~', 'NULL')
+			        THEN to_number(so_saleorder_b.vbdef18) END)) * (
+			        	joindata2.cjje / NULLIF((so_saleorder.ntotalorigsubmny - (
+			            	CASE WHEN so_saleorder.vdef18 IN ('~', 'NULL')
+			                THEN 0
+			                WHEN so_saleorder.vdef18 NOT IN ('~', 'NULL')
+			                THEN to_number(so_saleorder.vdef18) END)), 0))) / NULLIF(so_saleorder_exe.ntotaloutnum, 0)) * ic_saleout_b.nnum), 2)
+			    WHEN so_saleorder_b.bboutendflag = 'N'
+			    THEN ROUND(((((so_saleorder_exe.norigsubmny - (
+			    	CASE WHEN so_saleorder_b.vbdef18 IN ('~', 'NULL')
+			        THEN 0
+			        WHEN so_saleorder_b.vbdef18 NOT IN ('~', 'NULL')
+			        THEN to_number(so_saleorder_b.vbdef18) END)) * (
+			        	joindata2.cjje / NULLIF((so_saleorder.ntotalorigsubmny - (
+			            	CASE WHEN so_saleorder.vdef18 IN ('~', 'NULL')
+			                THEN 0
+			                WHEN so_saleorder.vdef18 NOT IN ('~', 'NULL')
+			                THEN to_number(so_saleorder.vdef18) END)), 0))) / NULLIF(so_saleorder_b.nnum, 0)) * ic_saleout_b.nnum), 2)
+			    END               AS 出库记账金额,
+			    joindata2.hddh    AS 活动单号,
+			    CASE WHEN joindata2.hddh IS NOT NULL THEN joindata2.szxm ELSE NULL END AS 活动收支项目
+			FROM so_saleorder_b
+			JOIN so_saleorder_exe
+				ON so_saleorder_b.csaleorderbid = so_saleorder_exe.csaleorderbid AND so_saleorder_exe.dr = '0'
+			JOIN so_saleorder
+				ON so_saleorder_b.csaleorderid = so_saleorder.csaleorderid AND so_saleorder.dr = '0'
+			LEFT JOIN ic_saleout_b
+				ON so_saleorder_b.csaleorderbid = ic_saleout_b.cfirstbillbid AND ic_saleout_b.dr = '0'
+			LEFT JOIN ic_saleout_h
+				ON ic_saleout_b.cgeneralhid = ic_saleout_h.cgeneralhid AND ic_saleout_h.dr = '0'
+			LEFT JOIN bd_customer
+				ON so_saleorder.ccustomerid = bd_customer.pk_customer AND bd_customer.dr = '0'
+			LEFT JOIN bd_custsale
+				ON bd_customer.pk_customer = bd_custsale.pk_customer AND bd_custsale.dr = '0'
+			LEFT JOIN org_orgs
+				ON bd_custsale.pk_financeorg = org_orgs.pk_org AND org_orgs.dr = '0'
+			LEFT JOIN org_dept
+				ON so_saleorder.cdeptvid = org_dept.pk_vid AND org_dept.dr = '0'
+			LEFT JOIN bd_material
+				ON so_saleorder_b.cmaterialid = bd_material.pk_material AND bd_material.dr = '0'
+			LEFT JOIN bd_branddoc
+				ON bd_material.pk_brand = bd_branddoc.pk_brand AND bd_branddoc.dr = '0'
+			LEFT JOIN bd_prodline
+				ON bd_material.pk_prodline = bd_prodline.pk_prodline AND bd_prodline.dr = '0'
+			LEFT JOIN
+			    (
+				    SELECT
+			            SUM(ic_saleout_b.nnum) nnum,
+			            bd_material.materialmnecode,
+			            ic_saleout_b.cfirstbillbid,
+			            ic_saleout_b.cmaterialvid
+			        FROM ic_saleout_b
+			        LEFT JOIN so_saleorder_b
+			        	ON ic_saleout_b.cfirstbillbid = so_saleorder_b.csaleorderbid AND so_saleorder_b.dr = '0'
+			        LEFT JOIN so_saleorder
+			        	ON so_saleorder_b.csaleorderid = so_saleorder.csaleorderid AND so_saleorder.dr = '0'
+			        LEFT JOIN bd_material
+			        	ON so_saleorder_b.cmaterialvid = bd_material.pk_material AND bd_material.dr = '0'
+			        WHERE ic_saleout_b.dr = '0'
+			        GROUP BY 
+			        	bd_material.materialmnecode, ic_saleout_b.cfirstbillbid, ic_saleout_b.cmaterialvid
+		        ) joindata1
+			ON so_saleorder_b.csaleorderbid = joindata1.cfirstbillbid
+			LEFT JOIN
+			    (
+			        SELECT
+			            so_arsub_detail.csalebillid,
+			            SUM(ndetailsubmny) cjje,
+			            so_arsub.vbillcode,
+			            so_arsub_b.carsubbid,
+			            bd_branddoc.name ppmc,
+			            bd_inoutbusiclass.name szxm,
+			            so_arsub_b.norigarsubmny zcje,
+			            so_arsub_b.nordersubmny cdje,
+			            so_arsub_b.norderoffaccmny jzje,
+			            so_arsub_b.norigarsubmny - so_arsub_b.norigarsubmny ye,
+			            DECODE(so_arsub.fstatusflag, '1', '自由', '2', '审批通过', '3', '冻结', '4', '关闭', '5', '失效', '7', '审批中', '8', '审批不通过') AS djzt,
+			            bd_billtype.billtypename djlx,
+			            SUBSTR(so_arsub.dbilldate, 1, 10) djrq,
+			            so_arsub.vnote bz,
+			            bd_defdoc.name nf,
+			            mkma_campaign.vcode AS hddh
+			        FROM so_arsub_detail
+			        JOIN so_arsub_b
+			        	ON so_arsub_detail.carsubbid = so_arsub_b.carsubbid AND so_arsub_b.dr = '0'
+			        LEFT JOIN mkma_campaign
+        				ON so_arsub_b.csrcid = mkma_campaign.pk_campaign AND mkma_campaign.dr = '0'
+			        JOIN so_arsub
+			        	ON so_arsub_b.carsubid = so_arsub.carsubid AND so_arsub.dr = '0'
+			        LEFT JOIN bd_branddoc
+			        	ON so_arsub_b.cbrandid = bd_branddoc.pk_brand AND bd_branddoc.dr = '0'
+			        LEFT JOIN bd_inoutbusiclass
+			        	ON so_arsub_b.cincomeprejectid = bd_inoutbusiclass.pk_inoutbusiclass AND bd_inoutbusiclass.dr = '0'
+			        LEFT JOIN bd_billtype
+			        	ON so_arsub.ctrantypeid = bd_billtype.pk_billtypeid
+			        LEFT JOIN bd_defdoc
+			        	ON so_arsub.vdef19 = bd_defdoc.pk_defdoc
+			        WHERE so_arsub_detail.dr=0
+			        GROUP BY
+			            so_arsub_detail.csalebillid,
+			            so_arsub.vbillcode,
+			            so_arsub_b.norigarsubmny - so_arsub_b.norigarsubmny,
+			            so_arsub_b.carsubbid,
+			            bd_branddoc.name,
+			            bd_inoutbusiclass.name,
+			            DECODE(so_arsub.fstatusflag, '1', '自由', '2', '审批通过', '3', '冻结', '4', '关闭', '5', '失效', '7', '审批中', '8', '审批不通过'),
+			            bd_billtype.billtypename,
+			            SUBSTR(so_arsub.dbilldate, 1, 10),
+			            so_arsub.vnote,
+			            bd_defdoc.name,
+			            so_arsub_b.norigarsubmny,
+			            so_arsub_b.nordersubmny,
+			            so_arsub_b.norderoffaccmny,
+			            mkma_campaign.vcode
+				) joindata2
+			ON so_saleorder_b.csaleorderid = joindata2.csalebillid
+			LEFT JOIN
+			    (
+			        SELECT
+			            ic_saleout_b.cfirstbillbid ckzbid,
+			            MIN(to_number(SUBSTR(ic_saleout_h.vbillcode, 5, 11) || ic_saleout_b.crowno)) zxdjh
+			        FROM ic_saleout_b
+			        LEFT JOIN ic_saleout_h
+			        	ON ic_saleout_b.cgeneralhid = ic_saleout_h.cgeneralhid AND ic_saleout_h.dr = '0'
+			        WHERE ic_saleout_b.dr = '0'
+			        GROUP BY ic_saleout_b.cfirstbillbid
+			    ) joindata3
+			ON joindata3.ckzbid = so_saleorder_b.csaleorderbid
+			LEFT JOIN
+			    (
+			        SELECT
+			            SUM(ic_saleout_b.nnum) ckzsl,
+			            SUM(ic_saleout_b.norigtaxmny) ckjshj,
+			            ic_saleout_b.cfirstbillbid,
+			            ic_saleout_h.dbilldate,
+			            ic_saleout_h.vbillcode,
+			            ic_saleout_h.fbillflag,
+			            ic_saleout_h.vnote bz,
+			            ic_saleout_h.cfanaceorgoid,
+			            ic_saleout_h.pk_org,
+			            ic_saleout_b.cgeneralbid
+			        FROM ic_saleout_b
+			        LEFT JOIN ic_saleout_h
+			        	ON ic_saleout_b.cgeneralhid = ic_saleout_h.cgeneralhid AND ic_saleout_h.dr = '0'
+			        WHERE ic_saleout_b.dr = '0'
+			        GROUP BY
+			            ic_saleout_b.cfirstbillbid,
+			            ic_saleout_b.cfirstbillbid,
+			            ic_saleout_h.dbilldate,
+			            ic_saleout_h.vbillcode,
+			            ic_saleout_h.fbillflag,
+			            ic_saleout_h.vnote,
+			            ic_saleout_h.cfanaceorgoid,
+			            ic_saleout_h.pk_org,
+			            ic_saleout_b.cgeneralbid
+				) joindata4
+			ON joindata4.cfirstbillbid = so_saleorder_b.csaleorderbid
+			WHERE so_saleorder_b.dr = '0' 
+				AND joindata2.vbillcode IS NOT NULL
+				AND ((so_saleorder_b.bboutendflag = 'Y' AND joindata1.nnum != '0') OR (so_saleorder_b.bboutendflag = 'N'))
+				AND joindata2.djlx NOT LIKE '%全额货补%'
+				AND SUBSTR(ic_saleout_h.dbilldate, 1, 10) BETWEEN #{startDate} AND #{endDate}
+			GROUP BY
+			    bd_custsale.pk_org,
+			    org_orgs.code,
+			    org_orgs.name,
+			    org_dept.pk_dept,
+			    org_dept.code,
+			    org_dept.name,
+			    SUBSTR(ic_saleout_h.dbilldate, 1, 10),
+			    to_number(SUBSTR(ic_saleout_h.vbillcode,5,11)||ic_saleout_b.crowno),
+			    joindata3.zxdjh,
+			    bd_customer.code,
+			    bd_customer.name,
+			    ic_saleout_b.cmaterialvid,
+			    bd_branddoc.pk_brand,
+			    bd_branddoc.name,
+			    bd_prodline.pk_prodline,
+			    bd_prodline.name,
+			    bd_customer.shortname,
+			    joindata2.vbillcode,
+			    so_saleorder.vbillcode,
+			    ic_saleout_h.vbillcode,
+			    so_saleorder_b.norigtaxmny,
+			    so_saleorder_exe.norigsubmny,
+			    so_saleorder.ntotalorigmny,
+			    so_saleorder.ntotalorigsubmny,
+			    joindata2.cjje,
+			    bd_material.materialmnecode ,
+			    so_saleorder_b.nnum,
+			    ic_saleout_b.nnum,
+			    so_saleorder_b.bboutendflag,
+			    so_saleorder_b.nqtorigtaxnetprc,
+			    joindata1.nnum,
+			    ic_saleout_b.crowno,
+			    ic_saleout_b.nshouldnum,
+			    joindata2.zcje,
+			    joindata2.cdje,
+			    joindata2.ye,
+			    joindata2.jzje,
+			    so_saleorder_b.norigtaxmny,
+			    joindata2.ppmc,
+			    joindata2.szxm,
+			    joindata2.carsubbid,
+			    joindata2.djzt,
+			    joindata2.djlx,
+			    joindata2.djrq,
+			    joindata2.bz,
+			    joindata2.nf,
+			    SUBSTR(so_saleorder.dbilldate, 1, 10),
+			    so_saleorder_b.vbdef18,
+			    so_saleorder.vdef18,
+			    so_saleorder_exe.ntotaloutnum,
+			    DECODE(so_saleorder.fstatusflag, '1', '自由', '2', '审批通过', '3', '冻结', '4', '关闭', '5', '失效', '7', '审批中', '8', '审批不通过'),
+			    DECODE(ic_saleout_h.fbillflag, '1', '删除', '2', '自由', '3', '签字', '4', '审核', '5', '审核中', '6', '审核不通过', '7', '已调差状态'),
+			    joindata2.hddh,
+			    CASE WHEN joindata2.hddh IS NOT NULL THEN joindata2.szxm ELSE NULL END
+				UNION ALL
+				SELECT
+				    bd_custsale.pk_org                    AS 组织主键,
+				    org_orgs.code                         AS 组织编码,
+				    org_orgs.name                         AS 财务组织,
+				    org_dept.pk_dept                      AS 部门主键,
+				    org_dept.code                         AS 部门编码,
+				    org_dept.name                         AS 部门名称,
+				    SUBSTR(ic_saleout_h.dbilldate, 1, 10) AS 出库日期,
+				    bd_customer.code                      AS 客户编码,
+				    bd_customer.name                      AS 客户名称,
+				    joindata2.vbillcode                   AS 客户费用单号,
+				    so_saleorder.vbillcode                AS 订单号,
+				    ic_saleout_h.vbillcode                AS 出库单号,
+				    joindata3.zxdjh                       AS 最小出库单号,
+				    bd_customer.shortname                 AS 客户简称,
+				    ic_saleout_b.cmaterialvid             AS 物料主键,
+				    bd_branddoc.pk_brand                  AS 品牌主键,
+				    bd_branddoc.name                AS 品牌,
+				    bd_prodline.pk_prodline         AS 生产线主键,
+				    bd_prodline.name                AS 生产线,
+				    bd_material.materialmnecode     AS 助记码,
+				    joindata1.nnum                  AS 实发数量,
+				    so_saleorder_b.norigtaxmny      AS 价税合计,
+				    so_saleorder_b.nqtorigtaxnetprc AS 含税净价,
+				    so_saleorder_exe.norigsubmny    AS 累计冲抵金额,
+				    so_saleorder_b.nnum             AS 主数量,
+				    so_saleorder.ntotalorigsubmny   AS 费用冲抵金额,
+				    so_saleorder.ntotalorigmny      AS 价税总合计,
+				    joindata2.cjje                  AS 冲减金额,
+				    so_saleorder_b.bboutendflag     AS 发货是否关闭,
+				    joindata2.zcje                  AS 支持金额,
+				    joindata2.cdje                  AS 冲抵金额,
+				    joindata2.ye                    AS 余额,
+				    joindata2.jzje                  AS 记账金额,
+				    joindata2.ppmc                  AS 客户费用单品牌,
+				    joindata2.szxm                  AS 客户费用单收支项目,
+				    joindata2.carsubbid             AS 客户费用单字表ID,
+				    joindata2.djzt                        AS 客户费用单状态,
+				    joindata2.djlx                        AS 客户费用单类型,
+				    joindata2.djrq                        AS 客户费用单日期,
+				    joindata2.bz                          AS 备注,
+				    joindata2.nf                          AS 年份,
+				    SUBSTR(so_saleorder.dbilldate, 1, 10) AS 订单日期,
+				    DECODE(so_saleorder.fstatusflag, '1', '自由', '2', '审批通过', '3', '冻结', '4', '关闭', '5', '失效', '7', '审批中', '8', '审批不通过') AS 订单单据状态,
+			    	DECODE(ic_saleout_h.fbillflag, '1', '删除', '2', '自由', '3', '签字', '4', '审核', '5', '审核中', '6', '审核不通过', '7', '已调差状态') AS 出库单单据状态,
+				    CASE 
+				    	WHEN to_number(SUBSTR(ic_saleout_h.vbillcode, 5, 11) || ic_saleout_b.crowno) = joindata3.zxdjh
+			            THEN ROUND(((so_saleorder_b.norigtaxmny) * (joindata2.cjje / NULLIF(joindata1.je, 0))), 2)
+			            WHEN joindata3.zxdjh IS NULL
+			            THEN ROUND(((so_saleorder_b.norigtaxmny) * (joindata2.cjje / NULLIF(joindata1.je, 0))), 2)
+			            ELSE NULL
+				    END                                             AS 订单冲抵金额,
+				    ROUND(((ic_saleout_b.norigtaxmny) * (joindata2.cjje / NULLIF(joindata1.je, 0))), 2) AS 出库记账金额,
+				    joindata2.hddh    AS 活动单号,
+			    	CASE WHEN joindata2.hddh IS NOT NULL THEN joindata2.szxm ELSE NULL END AS 活动收支项目
+				FROM so_saleorder_b
+				JOIN so_saleorder_exe
+					ON so_saleorder_b.csaleorderbid = so_saleorder_exe.csaleorderbid AND so_saleorder_exe.dr = '0'
+				JOIN so_saleorder
+					ON so_saleorder_b.csaleorderid = so_saleorder.csaleorderid AND so_saleorder.dr = '0'
+				LEFT JOIN ic_saleout_b
+					ON so_saleorder_b.csaleorderbid = ic_saleout_b.cfirstbillbid AND ic_saleout_b.dr = '0'
+				LEFT JOIN ic_saleout_h
+					ON ic_saleout_b.cgeneralhid = ic_saleout_h.cgeneralhid AND ic_saleout_h.dr = '0'
+				LEFT JOIN bd_customer
+					ON so_saleorder.ccustomerid = bd_customer.pk_customer AND bd_customer.dr = '0'
+				LEFT JOIN bd_custsale
+					ON bd_customer.pk_customer = bd_custsale.pk_customer AND bd_custsale.dr = '0'
+				LEFT JOIN org_orgs
+					ON bd_custsale.pk_financeorg = org_orgs.pk_org AND org_orgs.dr = '0'
+				LEFT JOIN org_dept
+					ON so_saleorder.cdeptvid = org_dept.pk_vid AND org_dept.dr = '0'
+				LEFT JOIN bd_material
+					ON so_saleorder_b.cmaterialid = bd_material.pk_material AND bd_material.dr = '0'
+				LEFT JOIN bd_branddoc
+					ON bd_material.pk_brand = bd_branddoc.pk_brand AND bd_branddoc.dr = '0'
+				LEFT JOIN bd_prodline
+					ON bd_material.pk_prodline = bd_prodline.pk_prodline AND bd_prodline.dr = '0'
+				LEFT JOIN
+				    (
+				        SELECT
+				            SUM(ic_saleout_b.nnum) nnum,
+				            bd_material.materialmnecode,
+				            ic_saleout_b.cfirstbillbid,
+				            ic_saleout_b.cmaterialvid
+				        FROM ic_saleout_b
+				        LEFT JOIN so_saleorder_b
+				        	ON ic_saleout_b.cfirstbillbid = so_saleorder_b.csaleorderbid AND so_saleorder_b.dr = '0'
+				        LEFT JOIN so_saleorder
+				        	ON so_saleorder_b.csaleorderid = so_saleorder.csaleorderid AND so_saleorder.dr = '0'
+				        LEFT JOIN bd_material
+				        	ON so_saleorder_b.cmaterialvid = bd_material.pk_material AND bd_material.dr = '0'
+				        WHERE ic_saleout_b.dr = '0'
+				        GROUP BY
+				            bd_material.materialmnecode, ic_saleout_b.cfirstbillbid, ic_saleout_b.cmaterialvid
+					) joindata1
+				ON so_saleorder_b.csaleorderbid = joindata1.cfirstbillbid
+				LEFT JOIN
+				    (
+				        SELECT
+				            SUM((so_saleorder_b.norigtaxmny * so_saleorder_exe.ntotaloutnum) / so_saleorder_b.nnum) je,
+				            so_saleorder.csaleorderid
+				        FROM so_saleorder_b
+				        JOIN so_saleorder_exe
+        					ON so_saleorder_b.csaleorderbid = so_saleorder_exe.csaleorderbid and so_saleorder_exe.dr = '0'
+				        JOIN so_saleorder
+				        	ON so_saleorder_b.csaleorderid = so_saleorder.csaleorderid AND so_saleorder.dr = '0'
+				        WHERE so_saleorder_b.dr = '0'
+				        GROUP BY so_saleorder.csaleorderid
+				    ) joindata1
+				ON so_saleorder.csaleorderid = joindata1.csaleorderid
+				LEFT JOIN
+				    (
+				        SELECT
+				            so_arsub_detail.csalebillid,
+				            SUM(ndetailsubmny) cjje,
+				            so_arsub.vbillcode,
+				            so_arsub_b.carsubbid,
+				            bd_branddoc.name ppmc,
+				            bd_inoutbusiclass.name szxm,
+				            so_arsub_b.norigarsubmny zcje,
+				            so_arsub_b.nordersubmny cdje,
+				            so_arsub_b.norderoffaccmny jzje,
+				            so_arsub_b.norigarsubmny - so_arsub_b.norigarsubmny ye,
+				            DECODE(so_arsub.fstatusflag, '1', '自由', '2', '审批通过', '3', '冻结', '4', '关闭', '5', '失效', '7', '审批中', '8', '审批不通过') AS djzt,
+				            bd_billtype.billtypename djlx,
+				            SUBSTR(so_arsub.dbilldate, 1, 10) djrq,
+				            so_arsub.vnote bz,
+				            bd_defdoc.name nf,
+				            mkma_campaign.vcode AS hddh
+				        FROM so_arsub_detail
+				        JOIN so_arsub_b
+				        	ON so_arsub_detail.carsubbid = so_arsub_b.carsubbid AND so_arsub_b.dr = '0'
+				        LEFT JOIN mkma_campaign
+        					ON so_arsub_b.csrcid = mkma_campaign.pk_campaign AND mkma_campaign.dr = '0'
+				        JOIN so_arsub
+				        	ON so_arsub_b.carsubid = so_arsub.carsubid AND so_arsub.dr = '0'
+				        LEFT JOIN bd_branddoc
+				        	ON so_arsub_b.cbrandid = bd_branddoc.pk_brand AND bd_branddoc.dr = '0'
+				        LEFT JOIN bd_inoutbusiclass
+				        	ON so_arsub_b.cincomeprejectid = bd_inoutbusiclass.pk_inoutbusiclass AND bd_inoutbusiclass.dr = '0'
+				        LEFT JOIN bd_billtype
+				        	ON so_arsub.ctrantypeid = bd_billtype.pk_billtypeid
+				        LEFT JOIN bd_defdoc
+				        	ON so_arsub.vdef19 = bd_defdoc.pk_defdoc
+				        WHERE so_arsub_detail.dr = '0'
+				        GROUP BY
+				            so_arsub_detail.csalebillid,
+				            so_arsub.vbillcode,
+				            so_arsub_b.norigarsubmny - so_arsub_b.norigarsubmny,
+				            so_arsub_b.carsubbid,
+				            bd_branddoc.name,
+				            bd_inoutbusiclass.name,
+				            DECODE(so_arsub.fstatusflag, '1', '自由', '2', '审批通过', '3', '冻结', '4', '关闭', '5', '失效', '7', '审批中', '8', '审批不通过'),
+				            bd_billtype.billtypename,
+				            SUBSTR(so_arsub.dbilldate, 1, 10),
+				            so_arsub.vnote,
+				            bd_defdoc.name,
+				            so_arsub_b.norigarsubmny,
+				            so_arsub_b.nordersubmny,
+				            so_arsub_b.norderoffaccmny,
+				            mkma_campaign.vcode
+					) joindata2
+				ON so_saleorder_b.csaleorderid = joindata2.csalebillid
+				LEFT JOIN
+				    (
+				        SELECT
+				            ic_saleout_b.cfirstbillbid ckzbid,
+				            MIN(to_number(SUBSTR(ic_saleout_h.vbillcode, 5, 11) || ic_saleout_b.crowno)) zxdjh
+				        FROM ic_saleout_b
+				        LEFT JOIN ic_saleout_h
+				        	ON ic_saleout_b.cgeneralhid = ic_saleout_h.cgeneralhid AND ic_saleout_h.dr = '0'
+				        WHERE ic_saleout_b.dr = '0'
+				        GROUP BY ic_saleout_b.cfirstbillbid
+					) joindata3
+				ON joindata3.ckzbid = so_saleorder_b.csaleorderbid
+				LEFT JOIN
+				    (
+				        SELECT
+				            SUM(ic_saleout_b.nnum) ckzsl,
+				            SUM(ic_saleout_b.norigtaxmny) ckjshj,
+				            ic_saleout_b.cfirstbillbid,
+				            ic_saleout_h.dbilldate,
+				            ic_saleout_h.vbillcode,
+				            ic_saleout_h.fbillflag,
+				            ic_saleout_h.vnote bz,
+				            ic_saleout_h.cfanaceorgoid,
+				            ic_saleout_h.pk_org,
+				            ic_saleout_b.cgeneralbid
+				        FROM ic_saleout_b
+				        LEFT JOIN ic_saleout_h
+				        	ON ic_saleout_b.cgeneralhid = ic_saleout_h.cgeneralhid AND ic_saleout_h.dr = '0'
+				        WHERE ic_saleout_b.dr = '0'
+				        GROUP BY
+				            ic_saleout_b.cfirstbillbid,
+				            ic_saleout_b.cfirstbillbid,
+				            ic_saleout_h.dbilldate,
+				            ic_saleout_h.vbillcode,
+				            ic_saleout_h.fbillflag,
+				            ic_saleout_h.vnote,
+				            ic_saleout_h.cfanaceorgoid,
+				            ic_saleout_h.pk_org,
+				            ic_saleout_b.cgeneralbid
+					) joindata4
+				ON joindata4.cfirstbillbid = so_saleorder_b.csaleorderbid
+				WHERE so_saleorder_b.dr = '0'
+					AND joindata2.vbillcode IS NOT NULL
+					AND ((so_saleorder_b.bboutendflag = 'Y' AND joindata1.nnum != '0') OR (so_saleorder_b.bboutendflag = 'N'))
+					AND joindata2.djlx LIKE '%全额货补%'
+					AND SUBSTR(ic_saleout_h.dbilldate, 1, 10) BETWEEN #{startDate} AND #{endDate}
+				GROUP BY
+				    bd_custsale.pk_org,
+				    org_orgs.code,
+				    org_orgs.name,
+				    org_dept.pk_dept,
+				    org_dept.code,
+				    org_dept.name,
+				    SUBSTR(ic_saleout_h.dbilldate, 1, 10),
+				    to_number(SUBSTR(ic_saleout_h.vbillcode,5,11)||ic_saleout_b.crowno),
+				    joindata3.zxdjh,
+				    bd_customer.code,
+				    bd_customer.name,
+				    ic_saleout_b.cmaterialvid,
+				    bd_branddoc.pk_brand,
+				    bd_branddoc.name,
+				    bd_prodline.pk_prodline,
+				    bd_prodline.name,
+				    bd_customer.shortname,
+				    joindata2.vbillcode,
+				    so_saleorder.vbillcode,
+				    ic_saleout_h.vbillcode,
+				    so_saleorder_b.norigtaxmny,
+				    so_saleorder_exe.norigsubmny,
+				    so_saleorder.ntotalorigmny,
+				    so_saleorder.ntotalorigsubmny,
+				    joindata2.cjje,
+				    bd_material.materialmnecode,
+				    so_saleorder_b.nnum,
+				    ic_saleout_b.nnum,
+				    so_saleorder_b.bboutendflag,
+				    so_saleorder_b.nqtorigtaxnetprc,
+				    joindata1.nnum,
+				    ic_saleout_b.crowno,
+				    ic_saleout_b.nshouldnum,
+				    joindata2.zcje,
+				    joindata2.cdje,
+				    joindata2.ye,
+				    joindata2.jzje,
+				    so_saleorder_b.norigtaxmny,
+				    joindata2.ppmc,
+				    joindata2.szxm,
+				    joindata2.carsubbid,
+				    joindata2.djzt,
+				    joindata2.djlx,
+				    joindata2.djrq,
+				    joindata2.bz,
+				    joindata2.nf,
+				    SUBSTR(so_saleorder.dbilldate, 1, 10),
+				    joindata1.je,
+				    ic_saleout_b.norigtaxmny,
+				    DECODE(so_saleorder.fstatusflag, '1', '自由', '2', '审批通过', '3', '冻结', '4', '关闭', '5', '失效', '7', '审批中', '8', '审批不通过'),
+			    	DECODE(ic_saleout_h.fbillflag, '1', '删除', '2', '自由', '3', '签字', '4', '审核', '5', '审核中', '6', '审核不通过', '7', '已调差状态'),
+				    joindata2.hddh,
+			    	CASE WHEN joindata2.hddh IS NOT NULL THEN joindata2.szxm ELSE NULL END
+    	</select>
+    	
+    	<!-- 客户折扣单销售明细表(市场部) -->
+    	<select id="getKHZKDXSMX_2" parameterType="map" resultType="map">
+    		SELECT
+			    bd_custsale.pk_org                    AS 组织主键,
+			    org_orgs.code                         AS 组织编码,
+			    org_orgs.name                         AS 财务组织,
+			    org_dept.pk_dept                      AS 部门主键,
+			    org_dept.code                         AS 部门编码,
+			    org_dept.name                         AS 部门名称 ,
+			    SUBSTR(ic_saleout_h.dbilldate, 1, 10) AS 出库日期,
+			    bd_customer.code                      AS 客户编码,
+			    bd_customer.name                      AS 客户名称,
+			    joindata2.vbillcode                   AS 客户费用单号,
+			    so_saleorder.vbillcode                AS 订单号 ,
+			    ic_saleout_h.vbillcode                AS 出库单号,
+			    joindata3.zxdjh                       AS 最小出库单号,
+			    bd_customer.shortname                 AS 客户简称,
+			    ic_saleout_b.cmaterialvid             AS 物料主键,
+			    bd_branddoc.pk_brand                  AS 品牌主键,
+			    bd_branddoc.name                AS 品牌,
+			    bd_prodline.pk_prodline         AS 生产线主键,
+			    bd_prodline.name                AS 生产线,
+			    bd_material.materialmnecode     AS 助记码,
+			    joindata1.nnum                  AS 实发数量,
+			    so_saleorder_b.norigtaxmny      AS 价税合计,
+			    so_saleorder_b.nqtorigtaxnetprc AS 含税净价,
+			    so_saleorder_exe.norigsubmny    AS 累计冲抵金额,
+			    so_saleorder_b.nnum             AS 主数量,
+			    so_saleorder.ntotalorigsubmny   AS 费用冲抵金额,
+			    so_saleorder.ntotalorigmny      AS 价税总合计,
+			    joindata2.cjje                  AS 冲减金额,
+			    so_saleorder_b.bboutendflag     AS 发货是否关闭,
+			    joindata2.zcje                  AS 支持金额,
+			    joindata2.cdje                  AS 冲抵金额,
+			    joindata2.ye                    AS 余额,
+			    joindata2.jzje                  AS 记账金额,
+			    joindata2.ppmc                  AS 客户费用单品牌,
+			    joindata2.szxm                  AS 客户费用单收支项目,
+			    joindata2.carsubbid             AS 客户费用单字表ID,
+			    joindata2.djzt                        AS 客户费用单状态,
+			    joindata2.djlx                        AS 客户费用单类型,
+			    joindata2.djrq                        AS 客户费用单日期,
+			    joindata2.bz                          AS 备注,
+			    joindata2.nf                          AS 年份,
+			    SUBSTR(so_saleorder.dbilldate, 1, 10) AS 订单日期,
+			    DECODE(so_saleorder.fstatusflag, '1', '自由', '2', '审批通过', '3', '冻结', '4', '关闭', '5', '失效', '7', '审批中', '8', '审批不通过') AS 订单单据状态,
+			    DECODE(ic_saleout_h.fbillflag, '1', '删除', '2', '自由', '3', '签字', '4', '审核', '5', '审核中', '6', '审核不通过', '7', '已调差状态') AS 出库单单据状态,
+			    CASE 
+				    WHEN to_number(SUBSTR(ic_saleout_h.vbillcode, 5, 11) || ic_saleout_b.crowno) = joindata3.zxdjh
+				    THEN (
+				    	CASE WHEN so_saleorder_b.bboutendflag = 'Y'
+				        THEN ROUND(((((so_saleorder_exe.norigsubmny - (
+				        	CASE WHEN so_saleorder_b.vbdef18 IN ('~', 'NULL')
+				            THEN 0
+				            WHEN so_saleorder_b.vbdef18 NOT IN ('~', 'NULL')
+				            THEN to_number(so_saleorder_b.vbdef18) END)) * (
+				            	joindata2.cjje / NULLIF((so_saleorder.ntotalorigsubmny - (
+				                	CASE WHEN so_saleorder.vdef18 IN ('~', 'NULL')
+				                    THEN 0
+				                    WHEN so_saleorder.vdef18 NOT IN ('~', 'NULL')
+				                    THEN to_number(so_saleorder.vdef18) END)), 0))))), 2)
+				    	WHEN so_saleorder_b.bboutendflag = 'N'
+				        THEN ROUND(((((so_saleorder_exe.norigsubmny - (
+				        	CASE WHEN so_saleorder_b.vbdef18 IN ('~', 'NULL')
+				            THEN 0
+				            WHEN so_saleorder_b.vbdef18 NOT IN ('~', 'NULL')
+				            THEN to_number(so_saleorder_b.vbdef18) END)) * (
+				            	joindata2.cjje / NULLIF((so_saleorder.ntotalorigsubmny - (
+				                	CASE WHEN so_saleorder.vdef18 IN ('~', 'NULL')
+				                    THEN 0
+				                    WHEN so_saleorder.vdef18 NOT IN ('~', 'NULL')
+				                    THEN to_number(so_saleorder.vdef18) END)), 0))))), 2)
+				                    END)
+				    WHEN joindata3.zxdjh IS NULL
+				    THEN ROUND(((((so_saleorder_exe.norigsubmny - (
+			        	CASE WHEN so_saleorder_b.vbdef18 IN ('~', 'NULL')
+			            THEN 0
+			            WHEN so_saleorder_b.vbdef18 NOT IN ('~', 'NULL')
+			            THEN to_number(so_saleorder_b.vbdef18) END)) * (
+			            	joindata2.cjje / NULLIF((so_saleorder.ntotalorigsubmny - (
+			                	CASE WHEN so_saleorder.vdef18 IN ('~', 'NULL')
+			                    THEN 0
+			                    WHEN so_saleorder.vdef18 NOT IN ('~', 'NULL')
+			                    THEN to_number(so_saleorder.vdef18) END)), 0))) / NULLIF(so_saleorder_b.nnum, 0)) * ic_saleout_b.nnum), 2)
+			        ELSE NULL
+			    END AS 订单冲抵金额,
+			    CASE WHEN so_saleorder_b.bboutendflag = 'Y'
+			    THEN ROUND(((((so_saleorder_exe.norigsubmny - (
+			    	CASE WHEN so_saleorder_b.vbdef18 IN ('~', 'NULL')
+			        THEN 0
+			        WHEN so_saleorder_b.vbdef18 NOT IN ('~', 'NULL')
+			        THEN to_number(so_saleorder_b.vbdef18) END)) * (
+			        	joindata2.cjje / NULLIF((so_saleorder.ntotalorigsubmny - (
+			            	CASE WHEN so_saleorder.vdef18 IN ('~', 'NULL')
+			                THEN 0
+			                WHEN so_saleorder.vdef18 NOT IN ('~', 'NULL')
+			                THEN to_number(so_saleorder.vdef18) END)), 0))) / NULLIF(so_saleorder_exe.ntotaloutnum, 0)) * ic_saleout_b.nnum), 2)
+			    WHEN so_saleorder_b.bboutendflag = 'N'
+			    THEN ROUND(((((so_saleorder_exe.norigsubmny - (
+			    	CASE WHEN so_saleorder_b.vbdef18 IN ('~', 'NULL')
+			        THEN 0
+			        WHEN so_saleorder_b.vbdef18 NOT IN ('~', 'NULL')
+			        THEN to_number(so_saleorder_b.vbdef18) END)) * (
+			        	joindata2.cjje / NULLIF((so_saleorder.ntotalorigsubmny - (
+			            	CASE WHEN so_saleorder.vdef18 IN ('~', 'NULL')
+			                THEN 0
+			                WHEN so_saleorder.vdef18 NOT IN ('~', 'NULL')
+			                THEN to_number(so_saleorder.vdef18) END)), 0))) / NULLIF(so_saleorder_b.nnum, 0)) * ic_saleout_b.nnum), 2)
+			    END               AS 出库记账金额,
+			    mkma_campaign.vcode    AS 活动单号,
+			    bd_inoutbusiclass.name AS 活动收支项目
+			FROM so_saleorder_b
+			JOIN so_saleorder_exe
+				ON so_saleorder_b.csaleorderbid = so_saleorder_exe.csaleorderbid AND so_saleorder_exe.dr = '0'
+			JOIN so_saleorder
+				ON so_saleorder_b.csaleorderid = so_saleorder.csaleorderid AND so_saleorder.dr = '0'
+			LEFT JOIN mkma_campaigncost
+				ON mkma_campaigncost.pk_campaign = so_saleorder_b.cpricepromtactid
+				AND mkma_campaigncost.dr = '0' AND mkma_campaigncost.cost_extend = '1'
+			LEFT JOIN bd_inoutbusiclass
+				ON bd_inoutbusiclass.pk_inoutbusiclass = mkma_campaigncost.pk_cost AND bd_inoutbusiclass.dr = '0'
+			LEFT JOIN mkma_campaign
+				ON mkma_campaigncost.pk_campaign = mkma_campaign.pk_campaign AND mkma_campaign.dr = '0'
+			LEFT JOIN ic_saleout_b
+				ON so_saleorder_b.csaleorderbid = ic_saleout_b.cfirstbillbid AND ic_saleout_b.dr = '0'
+			LEFT JOIN ic_saleout_h
+				ON ic_saleout_b.cgeneralhid = ic_saleout_h.cgeneralhid AND ic_saleout_h.dr = '0'
+			LEFT JOIN bd_customer
+				ON so_saleorder.ccustomerid = bd_customer.pk_customer AND bd_customer.dr = '0'
+			LEFT JOIN bd_custsale
+				ON bd_customer.pk_customer = bd_custsale.pk_customer AND bd_custsale.dr = '0'
+			LEFT JOIN org_orgs
+				ON bd_custsale.pk_financeorg = org_orgs.pk_org AND org_orgs.dr = '0'
+			LEFT JOIN org_dept
+				ON so_saleorder.cdeptvid = org_dept.pk_vid AND org_dept.dr = '0'
+			LEFT JOIN bd_material
+				ON so_saleorder_b.cmaterialid = bd_material.pk_material AND bd_material.dr = '0'
+			LEFT JOIN bd_branddoc
+				ON bd_material.pk_brand = bd_branddoc.pk_brand AND bd_branddoc.dr = '0'
+			LEFT JOIN bd_prodline
+				ON bd_material.pk_prodline = bd_prodline.pk_prodline AND bd_prodline.dr = '0'
+			LEFT JOIN
+			    (
+				    SELECT
+			            SUM(ic_saleout_b.nnum) nnum,
+			            bd_material.materialmnecode,
+			            ic_saleout_b.cfirstbillbid,
+			            ic_saleout_b.cmaterialvid
+			        FROM ic_saleout_b
+			        LEFT JOIN so_saleorder_b
+			        	ON ic_saleout_b.cfirstbillbid = so_saleorder_b.csaleorderbid AND so_saleorder_b.dr = '0'
+			        LEFT JOIN so_saleorder
+			        	ON so_saleorder_b.csaleorderid = so_saleorder.csaleorderid AND so_saleorder.dr = '0'
+			        LEFT JOIN bd_material
+			        	ON so_saleorder_b.cmaterialvid = bd_material.pk_material AND bd_material.dr = '0'
+			        WHERE ic_saleout_b.dr = '0'
+			        GROUP BY 
+			        	bd_material.materialmnecode, ic_saleout_b.cfirstbillbid, ic_saleout_b.cmaterialvid
+		        ) joindata1
+			ON so_saleorder_b.csaleorderbid = joindata1.cfirstbillbid
+			LEFT JOIN
+			    (
+			        SELECT
+			            so_arsub_detail.csalebillid,
+			            SUM(ndetailsubmny) cjje,
+			            so_arsub.vbillcode,
+			            so_arsub_b.carsubbid,
+			            bd_branddoc.name ppmc,
+			            bd_inoutbusiclass.name szxm,
+			            so_arsub_b.norigarsubmny zcje,
+			            so_arsub_b.nordersubmny cdje,
+			            so_arsub_b.norderoffaccmny jzje,
+			            so_arsub_b.norigarsubmny - so_arsub_b.norigarsubmny ye,
+			            DECODE(so_arsub.fstatusflag, '1', '自由', '2', '审批通过', '3', '冻结', '4', '关闭', '5', '失效', '7', '审批中', '8', '审批不通过') AS djzt,
+			            bd_billtype.billtypename djlx,
+			            SUBSTR(so_arsub.dbilldate, 1, 10) djrq,
+			            so_arsub.vnote bz,
+			            bd_defdoc.name nf
+			        FROM so_arsub_detail
+			        JOIN so_arsub_b
+			        	ON so_arsub_detail.carsubbid = so_arsub_b.carsubbid AND so_arsub_b.dr = '0'
+			        JOIN so_arsub
+			        	ON so_arsub_b.carsubid = so_arsub.carsubid AND so_arsub.dr = '0'
+			        LEFT JOIN bd_branddoc
+			        	ON so_arsub_b.cbrandid = bd_branddoc.pk_brand AND bd_branddoc.dr = '0'
+			        LEFT JOIN bd_inoutbusiclass
+			        	ON so_arsub_b.cincomeprejectid = bd_inoutbusiclass.pk_inoutbusiclass AND bd_inoutbusiclass.dr = '0'
+			        LEFT JOIN bd_billtype
+			        	ON so_arsub.ctrantypeid = bd_billtype.pk_billtypeid
+			        LEFT JOIN bd_defdoc
+			        	ON so_arsub.vdef19 = bd_defdoc.pk_defdoc
+			        WHERE so_arsub_detail.dr=0
+			        GROUP BY
+			            so_arsub_detail.csalebillid,
+			            so_arsub.vbillcode,
+			            so_arsub_b.norigarsubmny - so_arsub_b.norigarsubmny,
+			            so_arsub_b.carsubbid,
+			            bd_branddoc.name,
+			            bd_inoutbusiclass.name,
+			            DECODE(so_arsub.fstatusflag, '1', '自由', '2', '审批通过', '3', '冻结', '4', '关闭', '5', '失效', '7', '审批中', '8', '审批不通过'),
+			            bd_billtype.billtypename,
+			            SUBSTR(so_arsub.dbilldate, 1, 10),
+			            so_arsub.vnote,
+			            bd_defdoc.name,
+			            so_arsub_b.norigarsubmny,
+			            so_arsub_b.nordersubmny,
+			            so_arsub_b.norderoffaccmny
+				) joindata2
+			ON so_saleorder_b.csaleorderid = joindata2.csalebillid
+			LEFT JOIN
+			    (
+			        SELECT
+			            ic_saleout_b.cfirstbillbid ckzbid,
+			            MIN(to_number(SUBSTR(ic_saleout_h.vbillcode, 5, 11) || ic_saleout_b.crowno)) zxdjh
+			        FROM ic_saleout_b
+			        LEFT JOIN ic_saleout_h
+			        	ON ic_saleout_b.cgeneralhid = ic_saleout_h.cgeneralhid AND ic_saleout_h.dr = '0'
+			        WHERE ic_saleout_b.dr = '0'
+			        GROUP BY ic_saleout_b.cfirstbillbid
+			    ) joindata3
+			ON joindata3.ckzbid = so_saleorder_b.csaleorderbid
+			LEFT JOIN
+			    (
+			        SELECT
+			            SUM(ic_saleout_b.nnum) ckzsl,
+			            SUM(ic_saleout_b.norigtaxmny) ckjshj,
+			            ic_saleout_b.cfirstbillbid,
+			            ic_saleout_h.dbilldate,
+			            ic_saleout_h.vbillcode,
+			            ic_saleout_h.fbillflag,
+			            ic_saleout_h.vnote bz,
+			            ic_saleout_h.cfanaceorgoid,
+			            ic_saleout_h.pk_org,
+			            ic_saleout_b.cgeneralbid
+			        FROM ic_saleout_b
+			        LEFT JOIN ic_saleout_h
+			        	ON ic_saleout_b.cgeneralhid = ic_saleout_h.cgeneralhid AND ic_saleout_h.dr = '0'
+			        WHERE ic_saleout_b.dr = '0'
+			        GROUP BY
+			            ic_saleout_b.cfirstbillbid,
+			            ic_saleout_b.cfirstbillbid,
+			            ic_saleout_h.dbilldate,
+			            ic_saleout_h.vbillcode,
+			            ic_saleout_h.fbillflag,
+			            ic_saleout_h.vnote,
+			            ic_saleout_h.cfanaceorgoid,
+			            ic_saleout_h.pk_org,
+			            ic_saleout_b.cgeneralbid
+				) joindata4
+			ON joindata4.cfirstbillbid = so_saleorder_b.csaleorderbid
+			WHERE so_saleorder_b.dr = '0' 
+				AND joindata2.vbillcode IS NOT NULL
+				AND ((so_saleorder_b.bboutendflag = 'Y' AND joindata1.nnum != '0') OR (so_saleorder_b.bboutendflag = 'N'))
+				AND joindata2.djlx NOT LIKE '%全额货补%'
+				AND SUBSTR(ic_saleout_h.dbilldate, 1, 10) BETWEEN #{startDate} AND #{endDate}
+			GROUP BY
+			    bd_custsale.pk_org,
+			    org_orgs.code,
+			    org_orgs.name,
+			    org_dept.pk_dept,
+			    org_dept.code,
+			    org_dept.name,
+			    SUBSTR(ic_saleout_h.dbilldate, 1, 10),
+			    to_number(SUBSTR(ic_saleout_h.vbillcode,5,11)||ic_saleout_b.crowno),
+			    joindata3.zxdjh,
+			    bd_customer.code,
+			    bd_customer.name,
+			    ic_saleout_b.cmaterialvid,
+			    bd_branddoc.pk_brand,
+			    bd_branddoc.name,
+			    bd_prodline.pk_prodline,
+			    bd_prodline.name,
+			    bd_customer.shortname,
+			    joindata2.vbillcode,
+			    so_saleorder.vbillcode,
+			    ic_saleout_h.vbillcode,
+			    so_saleorder_b.norigtaxmny,
+			    so_saleorder_exe.norigsubmny,
+			    so_saleorder.ntotalorigmny,
+			    so_saleorder.ntotalorigsubmny,
+			    joindata2.cjje,
+			    bd_material.materialmnecode ,
+			    so_saleorder_b.nnum,
+			    ic_saleout_b.nnum,
+			    so_saleorder_b.bboutendflag,
+			    so_saleorder_b.nqtorigtaxnetprc,
+			    joindata1.nnum,
+			    ic_saleout_b.crowno,
+			    ic_saleout_b.nshouldnum,
+			    joindata2.zcje,
+			    joindata2.cdje,
+			    joindata2.ye,
+			    joindata2.jzje,
+			    so_saleorder_b.norigtaxmny,
+			    joindata2.ppmc,
+			    joindata2.szxm,
+			    joindata2.carsubbid,
+			    joindata2.djzt,
+			    joindata2.djlx,
+			    joindata2.djrq,
+			    joindata2.bz,
+			    joindata2.nf,
+			    SUBSTR(so_saleorder.dbilldate, 1, 10),
+			    so_saleorder_b.vbdef18,
+			    so_saleorder.vdef18,
+			    so_saleorder_exe.ntotaloutnum,
+			    DECODE(so_saleorder.fstatusflag, '1', '自由', '2', '审批通过', '3', '冻结', '4', '关闭', '5', '失效', '7', '审批中', '8', '审批不通过'),
+			    DECODE(ic_saleout_h.fbillflag, '1', '删除', '2', '自由', '3', '签字', '4', '审核', '5', '审核中', '6', '审核不通过', '7', '已调差状态'),
+			    mkma_campaign.vcode,
+			    bd_inoutbusiclass.name
+				UNION ALL
+				SELECT
+				    bd_custsale.pk_org                    AS 组织主键,
+				    org_orgs.code                         AS 组织编码,
+				    org_orgs.name                         AS 财务组织,
+				    org_dept.pk_dept                      AS 部门主键,
+				    org_dept.code                         AS 部门编码,
+				    org_dept.name                         AS 部门名称,
+				    SUBSTR(ic_saleout_h.dbilldate, 1, 10) AS 出库日期,
+				    bd_customer.code                      AS 客户编码,
+				    bd_customer.name                      AS 客户名称,
+				    joindata2.vbillcode                   AS 客户费用单号,
+				    so_saleorder.vbillcode                AS 订单号,
+				    ic_saleout_h.vbillcode                AS 出库单号,
+				    joindata3.zxdjh                       AS 最小出库单号,
+				    bd_customer.shortname                 AS 客户简称,
+				    ic_saleout_b.cmaterialvid             AS 物料主键,
+				    bd_branddoc.pk_brand                  AS 品牌主键,
+				    bd_branddoc.name                AS 品牌,
+				    bd_prodline.pk_prodline         AS 生产线主键,
+				    bd_prodline.name                AS 生产线,
+				    bd_material.materialmnecode     AS 助记码,
+				    joindata1.nnum                  AS 实发数量,
+				    so_saleorder_b.norigtaxmny      AS 价税合计,
+				    so_saleorder_b.nqtorigtaxnetprc AS 含税净价,
+				    so_saleorder_exe.norigsubmny    AS 累计冲抵金额,
+				    so_saleorder_b.nnum             AS 主数量,
+				    so_saleorder.ntotalorigsubmny   AS 费用冲抵金额,
+				    so_saleorder.ntotalorigmny      AS 价税总合计,
+				    joindata2.cjje                  AS 冲减金额,
+				    so_saleorder_b.bboutendflag     AS 发货是否关闭,
+				    joindata2.zcje                  AS 支持金额,
+				    joindata2.cdje                  AS 冲抵金额,
+				    joindata2.ye                    AS 余额,
+				    joindata2.jzje                  AS 记账金额,
+				    joindata2.ppmc                  AS 客户费用单品牌,
+				    joindata2.szxm                  AS 客户费用单收支项目,
+				    joindata2.carsubbid             AS 客户费用单字表ID,
+				    joindata2.djzt                        AS 客户费用单状态,
+				    joindata2.djlx                        AS 客户费用单类型,
+				    joindata2.djrq                        AS 客户费用单日期,
+				    joindata2.bz                          AS 备注,
+				    joindata2.nf                          AS 年份,
+				    SUBSTR(so_saleorder.dbilldate, 1, 10) AS 订单日期,
+				    DECODE(so_saleorder.fstatusflag, '1', '自由', '2', '审批通过', '3', '冻结', '4', '关闭', '5', '失效', '7', '审批中', '8', '审批不通过') AS 订单单据状态,
+			    	DECODE(ic_saleout_h.fbillflag, '1', '删除', '2', '自由', '3', '签字', '4', '审核', '5', '审核中', '6', '审核不通过', '7', '已调差状态') AS 出库单单据状态,
+				    CASE 
+				    	WHEN to_number(SUBSTR(ic_saleout_h.vbillcode, 5, 11) || ic_saleout_b.crowno) = joindata3.zxdjh
+			            THEN ROUND(((so_saleorder_b.norigtaxmny) * (joindata2.cjje / NULLIF(joindata1.je, 0))), 2)
+			            WHEN joindata3.zxdjh IS NULL
+			            THEN ROUND(((so_saleorder_b.norigtaxmny) * (joindata2.cjje / NULLIF(joindata1.je, 0))), 2)
+			            ELSE NULL
+				    END                                             AS 订单冲抵金额,
+				    ROUND(((ic_saleout_b.norigtaxmny) * (joindata2.cjje / NULLIF(joindata1.je, 0))), 2) AS 出库记账金额,
+				    mkma_campaign.vcode                                   AS 活动单号,
+				    bd_inoutbusiclass.name                                AS 活动收支项目
+				FROM so_saleorder_b
+				JOIN so_saleorder_exe
+					ON so_saleorder_b.csaleorderbid = so_saleorder_exe.csaleorderbid AND so_saleorder_exe.dr = '0'
+				JOIN so_saleorder
+					ON so_saleorder_b.csaleorderid = so_saleorder.csaleorderid AND so_saleorder.dr = '0'
+				LEFT JOIN mkma_campaigncost
+					ON mkma_campaigncost.pk_campaign = so_saleorder_b.cpricepromtactid 
+					AND mkma_campaigncost.dr = '0' AND mkma_campaigncost.cost_extend = '1'
+				LEFT JOIN bd_inoutbusiclass
+					ON bd_inoutbusiclass.pk_inoutbusiclass = mkma_campaigncost.pk_cost AND bd_inoutbusiclass.dr = '0'
+				LEFT JOIN mkma_campaign 
+					ON mkma_campaigncost.pk_campaign = mkma_campaign.pk_campaign AND mkma_campaign.dr = '0'
+				LEFT JOIN ic_saleout_b
+					ON so_saleorder_b.csaleorderbid = ic_saleout_b.cfirstbillbid AND ic_saleout_b.dr = '0'
+				LEFT JOIN ic_saleout_h
+					ON ic_saleout_b.cgeneralhid = ic_saleout_h.cgeneralhid AND ic_saleout_h.dr = '0'
+				LEFT JOIN bd_customer
+					ON so_saleorder.ccustomerid = bd_customer.pk_customer AND bd_customer.dr = '0'
+				LEFT JOIN bd_custsale
+					ON bd_customer.pk_customer = bd_custsale.pk_customer AND bd_custsale.dr = '0'
+				LEFT JOIN org_orgs
+					ON bd_custsale.pk_financeorg = org_orgs.pk_org AND org_orgs.dr = '0'
+				LEFT JOIN org_dept
+					ON so_saleorder.cdeptvid = org_dept.pk_vid AND org_dept.dr = '0'
+				LEFT JOIN bd_material
+					ON so_saleorder_b.cmaterialid = bd_material.pk_material AND bd_material.dr = '0'
+				LEFT JOIN bd_branddoc
+					ON bd_material.pk_brand = bd_branddoc.pk_brand AND bd_branddoc.dr = '0'
+				LEFT JOIN bd_prodline
+					ON bd_material.pk_prodline = bd_prodline.pk_prodline AND bd_prodline.dr = '0'
+				LEFT JOIN
+				    (
+				        SELECT
+				            SUM(ic_saleout_b.nnum) nnum,
+				            bd_material.materialmnecode,
+				            ic_saleout_b.cfirstbillbid,
+				            ic_saleout_b.cmaterialvid
+				        FROM ic_saleout_b
+				        LEFT JOIN so_saleorder_b
+				        	ON ic_saleout_b.cfirstbillbid = so_saleorder_b.csaleorderbid AND so_saleorder_b.dr = '0'
+				        LEFT JOIN so_saleorder
+				        	ON so_saleorder_b.csaleorderid = so_saleorder.csaleorderid AND so_saleorder.dr = '0'
+				        LEFT JOIN bd_material
+				        	ON so_saleorder_b.cmaterialvid = bd_material.pk_material AND bd_material.dr = '0'
+				        WHERE ic_saleout_b.dr = '0'
+				        GROUP BY
+				            bd_material.materialmnecode, ic_saleout_b.cfirstbillbid, ic_saleout_b.cmaterialvid
+					) joindata1
+				ON so_saleorder_b.csaleorderbid = joindata1.cfirstbillbid
+				LEFT JOIN
+				    (
+				        SELECT
+				            SUM((so_saleorder_b.norigtaxmny * so_saleorder_exe.ntotaloutnum) / so_saleorder_b.nnum) je,
+				            so_saleorder.csaleorderid
+				        FROM so_saleorder_b
+				        JOIN so_saleorder_exe
+        					ON so_saleorder_b.csaleorderbid = so_saleorder_exe.csaleorderbid and so_saleorder_exe.dr = '0'
+				        JOIN so_saleorder
+				        	ON so_saleorder_b.csaleorderid = so_saleorder.csaleorderid AND so_saleorder.dr = '0'
+				        WHERE so_saleorder_b.dr = '0'
+				        GROUP BY so_saleorder.csaleorderid
+				    ) joindata1
+				ON so_saleorder.csaleorderid = joindata1.csaleorderid
+				LEFT JOIN
+				    (
+				        SELECT
+				            so_arsub_detail.csalebillid,
+				            SUM(ndetailsubmny) cjje,
+				            so_arsub.vbillcode,
+				            so_arsub_b.carsubbid,
+				            bd_branddoc.name ppmc,
+				            bd_inoutbusiclass.name szxm,
+				            so_arsub_b.norigarsubmny zcje,
+				            so_arsub_b.nordersubmny cdje,
+				            so_arsub_b.norderoffaccmny jzje,
+				            so_arsub_b.norigarsubmny - so_arsub_b.norigarsubmny ye,
+				            DECODE(so_arsub.fstatusflag, '1', '自由', '2', '审批通过', '3', '冻结', '4', '关闭', '5', '失效', '7', '审批中', '8', '审批不通过') AS djzt,
+				            bd_billtype.billtypename djlx,
+				            SUBSTR(so_arsub.dbilldate, 1, 10) djrq,
+				            so_arsub.vnote bz,
+				            bd_defdoc.name nf
+				        FROM so_arsub_detail
+				        JOIN so_arsub_b
+				        	ON so_arsub_detail.carsubbid = so_arsub_b.carsubbid AND so_arsub_b.dr = '0'
+				        JOIN so_arsub
+				        	ON so_arsub_b.carsubid = so_arsub.carsubid AND so_arsub.dr = '0'
+				        LEFT JOIN bd_branddoc
+				        	ON so_arsub_b.cbrandid = bd_branddoc.pk_brand AND bd_branddoc.dr = '0'
+				        LEFT JOIN bd_inoutbusiclass
+				        	ON so_arsub_b.cincomeprejectid = bd_inoutbusiclass.pk_inoutbusiclass AND bd_inoutbusiclass.dr = '0'
+				        LEFT JOIN bd_billtype
+				        	ON so_arsub.ctrantypeid = bd_billtype.pk_billtypeid
+				        LEFT JOIN bd_defdoc
+				        	ON so_arsub.vdef19 = bd_defdoc.pk_defdoc
+				        WHERE so_arsub_detail.dr = '0'
+				        GROUP BY
+				            so_arsub_detail.csalebillid,
+				            so_arsub.vbillcode,
+				            so_arsub_b.norigarsubmny - so_arsub_b.norigarsubmny,
+				            so_arsub_b.carsubbid,
+				            bd_branddoc.name,
+				            bd_inoutbusiclass.name,
+				            DECODE(so_arsub.fstatusflag, '1', '自由', '2', '审批通过', '3', '冻结', '4', '关闭', '5', '失效', '7', '审批中', '8', '审批不通过'),
+				            bd_billtype.billtypename,
+				            SUBSTR(so_arsub.dbilldate, 1, 10),
+				            so_arsub.vnote,
+				            bd_defdoc.name,
+				            so_arsub_b.norigarsubmny,
+				            so_arsub_b.nordersubmny,
+				            so_arsub_b.norderoffaccmny
+					) joindata2
+				ON so_saleorder_b.csaleorderid = joindata2.csalebillid
+				LEFT JOIN
+				    (
+				        SELECT
+				            ic_saleout_b.cfirstbillbid ckzbid,
+				            MIN(to_number(SUBSTR(ic_saleout_h.vbillcode, 5, 11) || ic_saleout_b.crowno)) zxdjh
+				        FROM ic_saleout_b
+				        LEFT JOIN ic_saleout_h
+				        	ON ic_saleout_b.cgeneralhid = ic_saleout_h.cgeneralhid AND ic_saleout_h.dr = '0'
+				        WHERE ic_saleout_b.dr = '0'
+				        GROUP BY ic_saleout_b.cfirstbillbid
+					) joindata3
+				ON joindata3.ckzbid = so_saleorder_b.csaleorderbid
+				LEFT JOIN
+				    (
+				        SELECT
+				            SUM(ic_saleout_b.nnum) ckzsl,
+				            SUM(ic_saleout_b.norigtaxmny) ckjshj,
+				            ic_saleout_b.cfirstbillbid,
+				            ic_saleout_h.dbilldate,
+				            ic_saleout_h.vbillcode,
+				            ic_saleout_h.fbillflag,
+				            ic_saleout_h.vnote bz,
+				            ic_saleout_h.cfanaceorgoid,
+				            ic_saleout_h.pk_org,
+				            ic_saleout_b.cgeneralbid
+				        FROM ic_saleout_b
+				        LEFT JOIN ic_saleout_h
+				        	ON ic_saleout_b.cgeneralhid = ic_saleout_h.cgeneralhid AND ic_saleout_h.dr = '0'
+				        WHERE ic_saleout_b.dr = '0'
+				        GROUP BY
+				            ic_saleout_b.cfirstbillbid,
+				            ic_saleout_b.cfirstbillbid,
+				            ic_saleout_h.dbilldate,
+				            ic_saleout_h.vbillcode,
+				            ic_saleout_h.fbillflag,
+				            ic_saleout_h.vnote,
+				            ic_saleout_h.cfanaceorgoid,
+				            ic_saleout_h.pk_org,
+				            ic_saleout_b.cgeneralbid
+					) joindata4
+				ON joindata4.cfirstbillbid = so_saleorder_b.csaleorderbid
+				WHERE so_saleorder_b.dr = '0'
+					AND joindata2.vbillcode IS NOT NULL
+					AND ((so_saleorder_b.bboutendflag = 'Y' AND joindata1.nnum != '0') OR (so_saleorder_b.bboutendflag = 'N'))
+					AND joindata2.djlx LIKE '%全额货补%'
+					AND SUBSTR(ic_saleout_h.dbilldate, 1, 10) BETWEEN #{startDate} AND #{endDate}
+				GROUP BY
+				    bd_custsale.pk_org,
+				    org_orgs.code,
+				    org_orgs.name,
+				    org_dept.pk_dept,
+				    org_dept.code,
+				    org_dept.name,
+				    SUBSTR(ic_saleout_h.dbilldate, 1, 10),
+				    to_number(SUBSTR(ic_saleout_h.vbillcode,5,11)||ic_saleout_b.crowno),
+				    joindata3.zxdjh,
+				    bd_customer.code,
+				    bd_customer.name,
+				    ic_saleout_b.cmaterialvid,
+				    bd_branddoc.pk_brand,
+				    bd_branddoc.name,
+				    bd_prodline.pk_prodline,
+				    bd_prodline.name,
+				    bd_customer.shortname,
+				    joindata2.vbillcode,
+				    so_saleorder.vbillcode,
+				    ic_saleout_h.vbillcode,
+				    so_saleorder_b.norigtaxmny,
+				    so_saleorder_exe.norigsubmny,
+				    so_saleorder.ntotalorigmny,
+				    so_saleorder.ntotalorigsubmny,
+				    joindata2.cjje,
+				    bd_material.materialmnecode,
+				    so_saleorder_b.nnum,
+				    ic_saleout_b.nnum,
+				    so_saleorder_b.bboutendflag,
+				    so_saleorder_b.nqtorigtaxnetprc,
+				    joindata1.nnum,
+				    ic_saleout_b.crowno,
+				    ic_saleout_b.nshouldnum,
+				    joindata2.zcje,
+				    joindata2.cdje,
+				    joindata2.ye,
+				    joindata2.jzje,
+				    so_saleorder_b.norigtaxmny,
+				    joindata2.ppmc,
+				    joindata2.szxm,
+				    joindata2.carsubbid,
+				    joindata2.djzt,
+				    joindata2.djlx,
+				    joindata2.djrq,
+				    joindata2.bz,
+				    joindata2.nf,
+				    SUBSTR(so_saleorder.dbilldate, 1, 10),
+				    joindata1.je,
+				    ic_saleout_b.norigtaxmny,
+				    DECODE(so_saleorder.fstatusflag, '1', '自由', '2', '审批通过', '3', '冻结', '4', '关闭', '5', '失效', '7', '审批中', '8', '审批不通过'),
+			    	DECODE(ic_saleout_h.fbillflag, '1', '删除', '2', '自由', '3', '签字', '4', '审核', '5', '审核中', '6', '审核不通过', '7', '已调差状态'),
+				    mkma_campaign.vcode,
+				    bd_inoutbusiclass.name
+    	</select>
+    	
+    	<!-- 销售发票明细 -->
+    	<select id="getXSFPMX" resultType="map" parameterType="map">
+    		SELECT
+			    so_saleinvoice.vbillcode                               AS 发票号,
+			    ic_saleout_h.vbillcode                                 AS 出库单据号,
+			    recitem.billno                                         AS 应收单号,
+			    SUBSTR(so_saleinvoice.dbilldate,1,10)                  AS 发票日期,
+			    SUBSTR(ic_saleout_h.dbilldate,1,10)                    AS 出库日期,
+			    bd_billtype.billtypename                               AS 单据类型,
+			    bd_stordoc.name                                        AS 仓库,
+			    bd_customer.name                                       AS 客户,
+			    bd_customer.shortname                                  AS 客户简称,
+			    bd_customer.code                                       AS 客户编码,
+			    org_dept.name                                          AS 预算地区,
+			    bd_material_v.code                                     AS 物料编码,
+			    bd_material_v.materialmnecode                          AS 助记码,
+			    ic_saleout_b.nassistnum                                AS 出库数量,
+			    ic_saleout_b.nnum                                      AS 出库主数量,
+			    sm_user.user_name                                      AS 制单人,
+			    ic_saleout_b.crowno                                    AS 行号,
+			    ic_saleout_b.nqtorigtaxprice                           AS 含税单价,
+			    ic_saleout_b.nqtorigtaxprice * ic_saleout_b.nnum       AS 出库折前价税合计,
+			    ic_saleout_b.norigtaxmny                               AS 出库价税合计,
+			    ROUND(((NVL(so_saleorder_b.norigtaxmny,0) + NVL(so_saleorder_exe.norigsubmny,0))/ so_saleorder_b.nnum),5) AS 冲减前单价,
+			    so_saleinvoice_b.norigtaxmny                           AS 发票价税合计,
+			    so_saleinvoice_b.norigtaxprice * so_saleinvoice_b.nnum AS 发票折前价税合计,
+			    so_saleinvoice_b.nastnum                               AS 发票数量,
+			    so_saleinvoice_b.nnum                                  AS 发票主数量,
+			    so_saleinvoice_b.ninvoicedisrate                       AS 发票折扣,
+			    DECODE(ic_saleout_h.fbillflag, '1', '删除', '2', '自由', '3', '签字' ,'4' ,'审核', '5', '审核中', '6', '审核不通过', '7', '已调差状态') AS 单据状态,
+			    bd_prodline.name            AS 产品线,
+			    bd_branddoc.name            AS 品牌,
+			    bd_materialconvert.measrate AS 换算率,
+			    mkma_campaign.vcode         AS 活动单号,
+			    bd_inoutbusiclass.name      AS 价格促销活动收支项目
+			FROM so_saleinvoice
+			LEFT JOIN so_saleinvoice_b
+				ON so_saleinvoice_b.csaleinvoiceid = so_saleinvoice.csaleinvoiceid AND so_saleinvoice_b.dr = '0'
+			LEFT JOIN
+			    (SELECT ar_recitem.top_billid, ar_recitem.billno
+			     FROM ar_recitem
+			     WHERE ar_recitem.dr = '0'
+			     GROUP BY ar_recitem.top_billid, ar_recitem.billno) recitem
+				ON so_saleinvoice.csaleinvoiceid = recitem.top_billid
+			LEFT JOIN ic_saleout_b
+				ON so_saleinvoice_b.csrcbid = ic_saleout_b.cgeneralbid AND ic_saleout_b.dr = '0'
+			LEFT JOIN ic_saleout_h
+				ON ic_saleout_b.cgeneralhid = ic_saleout_h.cgeneralhid AND ic_saleout_h.dr = '0'
+			LEFT JOIN so_saleorder_b
+				ON ic_saleout_b.cfirstbillbid = so_saleorder_b.csaleorderbid AND so_saleorder_b.dr = '0'
+			LEFT JOIN so_saleorder
+				ON so_saleorder_b.csaleorderid = so_saleorder.csaleorderid AND so_saleorder.dr = '0'
+			LEFT JOIN
+			    so_saleorder_exe
+			ON
+			    so_saleorder_b.csaleorderbid = so_saleorder_exe.csaleorderbid
+			AND so_saleorder_exe.dr = '0'
+			LEFT JOIN bd_billtype
+				ON ic_saleout_h.ctrantypeid = bd_billtype.pk_billtypeid
+			LEFT JOIN bd_stordoc
+				ON bd_stordoc.pk_stordoc = ic_saleout_b.cbodywarehouseid
+			LEFT JOIN bd_material_v
+				ON ic_saleout_b.cmaterialvid = bd_material_v.pk_material
+			LEFT JOIN bd_customer
+				ON ic_saleout_b.casscustid = bd_customer.pk_customer
+			LEFT JOIN sm_user
+				ON ic_saleout_h.billmaker = sm_user.cuserid
+			LEFT JOIN org_dept
+				ON so_saleinvoice.vdef10 = org_dept.pk_dept AND org_dept.dr = '0'
+			LEFT JOIN bd_prodline
+				ON bd_prodline.pk_prodline=bd_material_v.pk_prodline AND bd_material_v.dr='0'
+			LEFT JOIN bd_branddoc
+				ON bd_branddoc.pk_brand=bd_material_v.pk_brand AND bd_material_v.dr='0'
+			LEFT JOIN bd_materialconvert
+				ON bd_materialconvert.pk_material=bd_material_v.pk_material AND bd_material_v.dr='0'
+				AND bd_materialconvert.pk_measdoc IN ('1001A110000000000ZFQ', '0001Z0100000000000XU')
+			LEFT JOIN mkma_campaigncost
+				ON mkma_campaigncost.pk_campaign = so_saleorder_b.cpricepromtactid
+				AND mkma_campaigncost.cost_extend = '1' AND mkma_campaigncost.dr = '0'
+			LEFT JOIN bd_inoutbusiclass
+				ON bd_inoutbusiclass.pk_inoutbusiclass = mkma_campaigncost.pk_cost AND bd_inoutbusiclass.dr = '0'
+			LEFT JOIN mkma_campaign
+				ON mkma_campaigncost.pk_campaign = mkma_campaign.pk_campaign AND mkma_campaign.dr = '0'
+			WHERE so_saleinvoice.dr = '0'
+				AND SUBSTR(so_saleinvoice.dbilldate,1,10) BETWEEN #{startDate} AND #{endDate}
+			ORDER BY so_saleinvoice.dbilldate, so_saleinvoice.vbillcode
+    	</select>
+    	
+    	<!-- 销售明细表 -->
+    	<select id="getXSMXB" resultType="map" parameterType="map">
+    		SELECT
+			    bd_material.code              AS 物料编码,
+			    bd_material.name              AS 物料名称,
+			    bd_material.materialspec      AS 商品规格,
+			    bd_material.materialshortname AS 助记码,
+			    bd_marbasclass.name           AS 物料分类,
+			    bd_branddoc.name              AS 品牌,
+			    bd_customer.shortname         AS 客户简称,
+			    bd_customer.name              AS 客户名称,
+			    bd_measdoc.name                         AS 计量单位,
+			    org_dept.name                           AS 部门,
+			    bd_customer.def4                        AS 城区,
+			    org_financeorg.name                     AS 财务组织,
+			    org_stockorg.name                       AS 库存组织,
+			    so_saleorder.vbillcode                  AS 销售订单号,
+			    SUBSTR(so_saleorder.dbilldate, 1, 10)   AS 销售订单日期,
+			    bd_billtype.billtypename                AS 单据类型,
+			    so_saleorder.vnote                      AS 摘要,
+			    so_saleorder.taudittime                 AS 订单审核日期,
+			    so_saleorder_b.nqtorigtaxprice          AS 含税单价,
+			    so_saleorder_b.nqtorigtaxnetprc         AS 含税净价,
+			    CASE so_saleorder.vdef9
+			        WHEN '1001A1100000000G4UFJ'
+			        THEN '否'
+			        WHEN '1001A1100000000G4UFI'
+			        THEN '是'
+			        ELSE '否'
+			    END                                                  AS 是否修订,
+			    so_saleorder_b.nqtorigtaxnetprc                      AS 冲抵前单价,
+			    so_saleorder_b.nnum                                  AS 订单主数量,
+			    SUBSTR(ic_saleout_h.dbilldate, 1, 10)                AS 出库日期,
+			    ic_saleout_h.vbillcode                               AS 出库单号,
+			    ic_saleout_h.vnote                                   AS 出库单备注,
+			    ic_saleout_h.dmakedate                               AS 出库单制单时间,
+			    ic_saleout_h.taudittime                              AS 出库单签字时间,
+			    bd_stordoc.name                                      AS 出库仓库,
+			    sm_user.user_name                                    AS 制单人,
+			    so_saleorder_b.vchangerate                           AS 换算率,
+			    so_saleorder_b.norigtaxmny                           AS 订单价税合计,
+			    so_saleorder_b.nqtorigtaxprice * so_saleorder_b.nnum AS 订单折前价税合计,
+			    ic_saleout_b.nnum                                    AS 出库主数量,
+			    ic_saleout_b.norigtaxmny                             AS 出库价税合计,
+			    ic_saleout_b.nqtorigtaxprice * ic_saleout_b.nnum     AS 出库折前价税合计,
+			    DECODE(ic_saleout_h.fbillflag, '1', '删除', '2', '自由', '3', '签字' ,'4' ,'审核', '5', '审核中', '6', '审核不通过', '7', '已调差状态') AS 销售出库单状态,
+			    DECODE(so_saleorder_b.bbsendendflag, 'Y', '发货关闭', 'N', '发货打开') AS 订单行状态,
+			    DECODE(so_saleorder.fstatusflag, '1', '自由', '2', '审批通过', '3', '冻结', '4', '关闭', '5', '失效', '7', '审批中', '8', '审批不通过') AS 订单状态
+			FROM so_saleorder
+				LEFT JOIN so_saleorder_b
+			ON so_saleorder_b.csaleorderid = so_saleorder.csaleorderid AND so_saleorder_b.dr = '0'
+			LEFT JOIN ic_saleout_b
+				ON ic_saleout_b.cfirstbillbid = so_saleorder_b.csaleorderbid AND ic_saleout_b.dr = '0'
+			LEFT JOIN ic_saleout_h
+				ON ic_saleout_b.cgeneralhid = ic_saleout_h.cgeneralhid AND ic_saleout_h.dr = '0'
+			LEFT JOIN bd_material
+				ON so_saleorder_b.cmaterialvid = bd_material.pk_material
+			LEFT JOIN bd_marbasclass
+				ON bd_material.pk_marbasclass = bd_marbasclass.pk_marbasclass
+			LEFT JOIN bd_branddoc
+				ON bd_material.pk_brand = bd_branddoc.pk_brand
+			LEFT JOIN bd_customer
+				ON so_saleorder.ccustomerid = bd_customer.pk_customer
+			LEFT JOIN bd_measdoc
+				ON so_saleorder_b.castunitid = bd_measdoc.pk_measdoc
+			LEFT JOIN org_dept
+				ON so_saleorder.cdeptvid = org_dept.pk_vid
+			LEFT JOIN org_financeorg
+				ON so_saleorder_b.csettleorgid = org_financeorg.pk_financeorg
+			LEFT JOIN org_stockorg
+				ON ic_saleout_h.pk_org = org_stockorg.pk_stockorg
+			LEFT JOIN bd_billtype
+				ON so_saleorder.ctrantypeid = bd_billtype.pk_billtypeid
+			LEFT JOIN bd_stordoc
+				ON ic_saleout_h.cwarehouseid = bd_stordoc.pk_stordoc
+			LEFT JOIN sm_user
+				ON so_saleorder.billmaker = sm_user.cuserid
+			WHERE so_saleorder.dr = '0'
+				AND SUBSTR(ic_saleout_h.dbilldate, 1, 10) BETWEEN #{startDate} AND #{endDate}
+			ORDER BY ic_saleout_h.dbilldate, ic_saleout_h.vbillcode
+    	</select>
+    	
+    	<!-- 助促销品明细 -->
+    	<select id="getZCXPMX" resultType="map" parameterType="map">
+    		SELECT
+			    org_stockorg_v.name      AS 库存组织,
+			    bd_stordoc.name          AS 仓库,
+			    bd_billtype.billtypename AS 单据类型,
+			    bd_inoutbusiclass.name                   AS 收支项目,
+			    bd_marbasclass.name                      AS 物料分类,
+			    ic_generalout_h.vbillcode                AS 出库号,
+			    SUBSTR(ic_generalout_b.dbizdate, 1, 10)  AS 出库日期,
+			    SUBSTR(ic_generalout_h.dbilldate, 1, 10) AS 单据日期,
+			    SUBSTR(ic_generalout_h.dmakedate, 1, 10) AS 制单日期,
+			    SUBSTR(ic_generalout_h.modifiedtime, 1, 10) AS 修改日期,
+			    ic_generalout_h.vnote                       AS 备注,
+			    bd_material_v.code                          AS 物料编码,
+			    bd_material_v.name                          AS 物料名称,
+			    bd_material_v.materialspec                  AS 商品规格,
+			    bd_material_v.materialmnecode               AS 助记码,
+			    ic_generalout_b.nnum                        AS 主数量,
+			    ic_generalout_b.nassistnum                  AS 数量,
+			    CASE
+			        WHEN ic_generalout_b.vbdef4 = '~'
+			        THEN 0
+			        ELSE CAST(ic_generalout_b.vbdef4 AS NUMBER(10, 2))
+			    END                    AS 金额,
+			    sm_user.user_name      AS 制单人,
+			    ic_generalout_b.crowno AS 行号,
+			    bd_customer.name       AS 客户,
+			    bd_customer.code       AS 客户编码,
+			    DECODE(ic_generalout_h.fbillflag, '1', '删除', '2', '自由', '3', '签字' ,'4' ,'审核', '5', '审核中', '6', '审核不通过', '7', '已调差状态') AS 单据状态
+			FROM ic_generalout_h
+			LEFT JOIN org_stockorg_v
+				ON ic_generalout_h.pk_org_v = org_stockorg_v.pk_vid
+			LEFT JOIN ic_generalout_b
+				ON ic_generalout_h.cgeneralhid = ic_generalout_b.cgeneralhid AND ic_generalout_b.dr = '0'
+			LEFT JOIN bd_stordoc
+				ON ic_generalout_b.cbodywarehouseid = bd_stordoc.pk_stordoc
+			LEFT JOIN bd_billtype
+				ON ic_generalout_h.ctrantypeid = bd_billtype.pk_billtypeid
+			LEFT JOIN bd_inoutbusiclass
+				ON ic_generalout_b.vbdef10 = bd_inoutbusiclass.pk_inoutbusiclass
+			LEFT JOIN bd_material_v
+				ON ic_generalout_b.cmaterialvid = bd_material_v.pk_material
+			LEFT JOIN bd_marbasclass
+				ON bd_material_v.pk_marbasclass = bd_marbasclass.pk_marbasclass
+			LEFT JOIN sm_user
+				ON ic_generalout_h.billmaker = sm_user.cuserid
+			LEFT JOIN bd_customer
+				ON ic_generalout_b.casscustid = bd_customer.pk_customer
+			WHERE ic_generalout_h.dr = '0'
+				AND SUBSTR(ic_generalout_h.dbilldate, 1, 10) BETWEEN #{startDate} AND #{endDate}
+			ORDER BY ic_generalout_h.dbilldate, ic_generalout_h.vbillcode
+    	</select>
+    	
+    	<!-- 客户信息表(销售部莫小红) -->
+    	<select id="getKHXXB" resultType="map">
+    		SELECT
+			bd_customer.code AS 客户编码,
+			bd_customer.name AS 客户名称,
+			bd_customer.shortname AS 客户简称,
+			bd_custclass.name AS 客户基本分类,
+			bd_areacl.name AS 地区分类,
+			org_dept.name AS 专管部门,
+			bd_customer.def4 AS 所属区域,
+			bd_defdoc1.name AS 大区,
+			bd_defdoc2.name AS 分区,
+			org_financeorg.name AS 结算财务组织
+			FROM bd_customer
+			LEFT JOIN bd_custclass
+			ON bd_customer.pk_custclass = bd_custclass.pk_custclass
+			LEFT JOIN bd_areacl
+			ON bd_customer.pk_areacl = bd_areacl.pk_areacl
+			LEFT JOIN bd_custsale
+			ON bd_customer.pk_customer = bd_custsale.pk_customer
+			LEFT JOIN org_dept
+			ON bd_custsale.respdept = org_dept.pk_dept
+			LEFT JOIN bd_defdoc bd_defdoc1
+			ON bd_customer.def5 = bd_defdoc1.pk_defdoc
+			LEFT JOIN bd_defdoc bd_defdoc2
+			ON bd_customer.def6 = bd_defdoc2.pk_defdoc
+			LEFT JOIN org_financeorg
+			ON bd_custsale.pk_financeorg = org_financeorg.pk_financeorg
+			WHERE bd_customer.dr = '0' AND bd_customer.enablestate = '2' AND bd_customer.pk_custclass IN (SELECT pk_custclass FROM bd_custclass WHERE code IN ('0101','0102','0103','0104'))
+			ORDER BY bd_customer.code
+    	</select>
+    </mapper>

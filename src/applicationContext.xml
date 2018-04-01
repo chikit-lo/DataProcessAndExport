@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:task="http://www.springframework.org/schema/task"
+    xsi:schemaLocation="
+     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+     http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+     http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+     
+     <!-- 扫描类包, 将标注Spring注解的类自动转化Bean, 同时完成Bean的注入 -->
+     <context:component-scan base-package="com.service,com.aspect" />
+     
+     <!-- 扫描定时任务注解 -->
+     <task:annotation-driven />
+     
+     <!-- 启动AspectJ支持, 找到被注解了的切面类，进行切面配置 -->
+     <aop:aspectj-autoproxy proxy-target-class="true" />
+     
+     <!-- 读取属性文件信息, 并将这些信息设置成Spring配置文件的数据 -->
+     <context:property-placeholder location="classpath:jdbc.properties" />
+     
+     
+     <!-- 配置连接数据库的驱动，URL，账号和密码 -->
+     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+     	<property name="driverClassName">
+     		<value>${innet.jdbc.driverClassName}</value>
+     	</property>
+     	<property name="url">
+     		<value>${innet.jdbc.url}</value>
+     	</property>
+     	<property name="username">
+     		<value>${innet.jdbc.username}</value>
+     	</property>
+     	<property name="password">
+     		<value>${innet.jdbc.password}</value>
+     	</property>
+     </bean>
+     
+     <!-- 扫描XML配置文件 -->
+     <bean id="sqlSession" class="org.mybatis.spring.SqlSessionFactoryBean">
+     	<property name="typeAliasesPackage" value="com.pojo" />
+     	<property name="dataSource" ref="dataSource" />
+     	<property name="mapperLocations" value="classpath:com/mapper/*.xml" />
+     </bean>
+     
+     <!-- 扫描Mapper类 -->
+     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+     	<property name="basePackage" value="com.mapper" />
+     </bean>
+</beans>
